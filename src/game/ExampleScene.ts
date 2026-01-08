@@ -11,34 +11,38 @@ export default class ExampleScene extends Phaser.Scene {
     preload() {
         // 1. Fix the path to the image (remove 'tilemaps/')
         // Based on your screenshot, 'tiles' is directly inside 'assets'
-        this.load.image('tiles', 'assets/tiles/cybernoid.png');
+        // this.load.image('tiles', 'assets/tiles/cybernoid.png');
+        this.load.image('Island_24x24', 'assets/P_P_FREE_RPG_TILESET/Island_24x24.png');
+        this.load.image('Dungeon_24x24', 'assets/P_P_FREE_RPG_TILESET/Dungeon_24x24.png');
+        this.load.image('example', 'assets/P_P_FREE_RPG_TILESET/example.png');
+        this.load.image('decor', 'assets/P_P_FREE_RPG_TILESET/decor.png');
 
         // 2. Fix the path to the map (change 'tilemaps' to 'tilemap')
-        this.load.tilemapTiledJSON('map', 'assets/tilemap/maps/cybernoid.json');
+        // this.load.tilemapTiledJSON('map', 'assets/tilemap/maps/cybernoid.json');
+        this.load.tilemapTiledJSON('map', 'assets/tiled/maps/dungeon.json');
     }
 
     create() {
         // 1. Create the map from the loaded JSON key
         const map = this.make.tilemap({ key: 'map' });
 
-        // 2. SAFETY CHECK: Get the tileset name directly from the JSON data
-        // Tiled JSONs have a "name" property for the tileset. We must use that exact string.
-        const tilesetName = map.tilesets[0].name; 
+         // Add all tilesets - link tileset name (from JSON) to image key (from preload)
+        const tileset1 = map.addTilesetImage('Island_24x24', 'Island_24x24');
+        const tileset2 = map.addTilesetImage('example', 'example');
+        const tileset3 = map.addTilesetImage('decor', 'decor');
+        const tileset4 = map.addTilesetImage('Dungeon_24x24', 'Dungeon_24x24');
         
-        // Link the tileset name (from JSON) to the loaded image key ('tiles')
-        const tiles = map.addTilesetImage(tilesetName, 'tiles');
-
-        if (!tiles) {
-            console.error('Tileset could not be loaded. Check spelling or JSON data.');
-            return;
-        }
-
-        // 3. SAFETY CHECK: Get the layer name directly from the JSON data
-        // Instead of using index 0, we use the actual name of the first layer
-        const layerName = map.layers[0].name;
+        //console.log('Tilesets loaded:', tileset1, tileset2, tileset3, tileset4);
         
-        const layer = map.createLayer(layerName, tiles, 0, 0);
+        // Filter out null values - createLayer doesn't accept nulls
+        const tilesets = [tileset1, tileset2, tileset3, tileset4].filter(
+            (t): t is Phaser.Tilemaps.Tileset => t !== null
+        );
 
+        // Create all tile layers by name
+        map.createLayer('BaseMap', tilesets, 0, 0);
+        map.createLayer('Objects', tilesets, 0, 0);
+        
         // ... rest of your code (cameras, controls) ...
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         
@@ -52,7 +56,7 @@ export default class ExampleScene extends Phaser.Scene {
             right: this.cursors.right,
             up: this.cursors.up,
             down: this.cursors.down,
-            speed: 0.5
+            speed: 0.3
         };
 
         this.controls = new Phaser.Cameras.Controls.FixedKeyControl(controlConfig);

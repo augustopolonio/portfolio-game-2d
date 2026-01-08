@@ -46,11 +46,11 @@
                  "type":"",
                  "visible":true,
                  "width":76,
-                 "x":116.666666666667,
-                 "y":105.333333333333
+                 "x":116.667,
+                 "y":105.333
                 }, 
                 {
-                 "height":30.6666666666667,
+                 "height":30.6667,
                  "id":5,
                  "name":"",
                  "rotation":0,
@@ -58,7 +58,7 @@
                  "visible":true,
                  "width":71,
                  "x":241.5,
-                 "y":110.666666666667
+                 "y":110.667
                 }, 
                 {
                  "height":213,
@@ -72,37 +72,37 @@
                  "y":193.33
                 }, 
                 {
-                 "height":14.6666666666667,
+                 "height":14.6667,
                  "id":8,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":75.3333333333333,
+                 "width":75.3333,
                  "x":116,
-                 "y":461.333333333333
+                 "y":461.333
                 }, 
                 {
-                 "height":16.6666666666667,
+                 "height":16.6667,
                  "id":9,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":91.3333333333333,
-                 "x":238.666666666667,
-                 "y":460.666666666667
+                 "width":91.3333,
+                 "x":238.667,
+                 "y":460.667
                 }, 
                 {
-                 "height":33.3333333333333,
+                 "height":33.3333,
                  "id":10,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":48,
-                 "x":192.833333333333,
-                 "y":87.8333333333333
+                 "x":192.833,
+                 "y":87.8333
                 }, 
                 {
                  "height":73,
@@ -193,7 +193,7 @@
          "name":"Interactables",
          "objects":[
                 {
-                 "height":19.3333333333333,
+                 "height":19.3333,
                  "id":29,
                  "name":"dungeon_door_exit",
                  "properties":[
@@ -211,7 +211,7 @@
                  "type":"door",
                  "visible":true,
                  "width":48,
-                 "x":190.666666666667,
+                 "x":190.667,
                  "y":470
                 }, 
                 {
@@ -246,7 +246,7 @@
                  "visible":true,
                  "width":0,
                  "x":214.5,
-                 "y":178.833333333333
+                 "y":178.833
                 }, 
                 {
                  "height":0,
@@ -311,16 +311,72 @@
  "tileheight":24,
  "tilesets":[
         {
+         "columns":15,
          "firstgid":1,
-         "source":"Dungeon_24x24.tsx"
+         "image":"..\/..\/..\/www\/React\/_clones\/template-react-ts\/public\/assets\/P_P_FREE_RPG_TILESET\/Dungeon_24x24.png",
+         "imageheight":168,
+         "imagewidth":360,
+         "margin":0,
+         "name":"Dungeon_24x24",
+         "spacing":0,
+         "tilecount":105,
+         "tileheight":24,
+         "tilewidth":24
         }, 
         {
+         "columns":9,
          "firstgid":106,
-         "source":"Island_24x24.tsx"
+         "image":"..\/..\/..\/www\/React\/_clones\/template-react-ts\/public\/assets\/P_P_FREE_RPG_TILESET\/Island_24x24.png",
+         "imageheight":192,
+         "imagewidth":216,
+         "margin":0,
+         "name":"Island_24x24",
+         "spacing":0,
+         "tilecount":72,
+         "tileheight":24,
+         "tilewidth":24
         }, 
         {
+         "columns":7,
          "firstgid":178,
-         "source":"decor.tsx"
+         "image":"..\/..\/Assets\/2D\/P_P_FREE_RPG_TILESET\/P_P_FREE_RPG_TILESET\/decor.png",
+         "imageheight":144,
+         "imagewidth":168,
+         "margin":0,
+         "name":"decor",
+         "spacing":0,
+         "tilecount":42,
+         "tileheight":24,
+         "tiles":[
+                {
+                 "id":1,
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"chest"
+                        }, 
+                        {
+                         "name":"state",
+                         "type":"string",
+                         "value":"closed"
+                        }]
+                }, 
+                {
+                 "id":4,
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"chest"
+                        }, 
+                        {
+                         "name":"state",
+                         "type":"string",
+                         "value":"open"
+                        }]
+                }],
+         "tilewidth":24
         }],
  "tilewidth":24,
  "type":"map",

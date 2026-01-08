@@ -235,59 +235,59 @@
                  "y":47.5
                 }, 
                 {
-                 "height":18.3636363636364,
+                 "height":18.3636,
                  "id":31,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":16.3636363636363,
-                 "x":411.272727272727,
+                 "width":16.3636,
+                 "x":411.273,
                  "y":246
                 }, 
                 {
-                 "height":12.1818181818182,
+                 "height":12.1818,
                  "id":32,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":16.7272727272727,
-                 "x":315.636363636364,
-                 "y":252.363636363636
+                 "width":16.7273,
+                 "x":315.636,
+                 "y":252.364
                 }, 
                 {
-                 "height":12.3636363636364,
+                 "height":12.3636,
                  "id":33,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":16.1818181818182,
+                 "width":16.1818,
                  "x":388,
                  "y":252
                 }, 
                 {
-                 "height":15.8181818181819,
+                 "height":15.8182,
                  "id":34,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":22.5454545454546,
-                 "x":347.636363636364,
-                 "y":331.454545454545
+                 "width":22.5455,
+                 "x":347.636,
+                 "y":331.455
                 }, 
                 {
-                 "height":9.09090909090907,
+                 "height":9.09091,
                  "id":35,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":15.2727272727273,
-                 "x":294.181818181818,
-                 "y":374.545454545455
+                 "width":15.2727,
+                 "x":294.182,
+                 "y":374.545
                 }, 
                 {
                  "height":10,
@@ -296,42 +296,42 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":19.0909090909091,
-                 "x":386.727272727273,
-                 "y":374.909090909091
+                 "width":19.0909,
+                 "x":386.727,
+                 "y":374.909
                 }, 
                 {
-                 "height":11.2727272727273,
+                 "height":11.2727,
                  "id":37,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":12.1818181818182,
-                 "x":414.181818181818,
-                 "y":227.454545454545
+                 "width":12.1818,
+                 "x":414.182,
+                 "y":227.455
                 }, 
                 {
-                 "height":10.1818181818182,
+                 "height":10.1818,
                  "id":38,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":15.2727272727273,
-                 "x":604.727272727273,
-                 "y":303.090909090909
+                 "width":15.2727,
+                 "x":604.727,
+                 "y":303.091
                 }, 
                 {
-                 "height":10.7272727272727,
+                 "height":10.7273,
                  "id":39,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":17.6363636363636,
-                 "x":363.272727272727,
-                 "y":230.181818181818
+                 "width":17.6364,
+                 "x":363.273,
+                 "y":230.182
                 }, 
                 {
                  "height":12,
@@ -340,9 +340,9 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":17.0909090909091,
-                 "x":651.272727272727,
-                 "y":61.8181818181818
+                 "width":17.0909,
+                 "x":651.273,
+                 "y":61.8182
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -420,7 +420,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":587.454545454545,
+                 "x":587.455,
                  "y":126
                 }],
          "opacity":1,
@@ -450,8 +450,17 @@
          "tilewidth":24
         }, 
         {
+         "columns":20,
          "firstgid":73,
-         "source":"example.tsx"
+         "image":"..\/..\/..\/www\/React\/_clones\/template-react-ts\/public\/assets\/P_P_FREE_RPG_TILESET\/example.png",
+         "imageheight":240,
+         "imagewidth":480,
+         "margin":0,
+         "name":"example",
+         "spacing":0,
+         "tilecount":200,
+         "tileheight":24,
+         "tilewidth":24
         }, 
         {
          "columns":7,
