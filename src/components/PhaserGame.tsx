@@ -18,7 +18,13 @@ const PhaserGame = () => {
             parent: gameContainer.current, // Attach game to our React Ref
             pixelArt: true,
             scene: ExampleScene,
-            //zoom: 5,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { x: 0, y: 0 },
+                    debug: false
+                }
+            },
         };
 
         // 3. Initialize the game
