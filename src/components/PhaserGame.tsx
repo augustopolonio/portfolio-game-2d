@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import ExampleScene from '../game/ExampleScene';
+import DungeonScene from '../game/DungeonScene';
+import IslandScene from '../game/IslandScene';
 
 const PhaserGame = () => {
     // 1. Create a reference to the DOM element that will hold the game
@@ -17,7 +18,7 @@ const PhaserGame = () => {
             backgroundColor: '#2d2d2d',
             parent: gameContainer.current, // Attach game to our React Ref
             pixelArt: true,
-            scene: ExampleScene,
+            scene: [DungeonScene, IslandScene],
             physics: {
                 default: 'arcade',
                 arcade: {
