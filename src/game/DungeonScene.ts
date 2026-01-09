@@ -62,7 +62,7 @@ export default class DungeonScene extends BaseScene {
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
             
             if (goToMap === 'island') {
-                this.scene.start('IslandScene', { spawnLocation: goToDoor });
+                this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             }
         } else if (obj.class === 'info') {
             const text = obj.properties?.find((p: any) => p.name === 'text')?.value;

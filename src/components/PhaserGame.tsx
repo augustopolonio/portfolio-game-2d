@@ -13,8 +13,8 @@ const PhaserGame = () => {
         // 2. Game Configuration
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.WEBGL,
-            width: 600,
-            height: 300,
+            width: 800,
+            height: 500,
             backgroundColor: '#2d2d2d',
             parent: gameContainer.current, // Attach game to our React Ref
             pixelArt: true,

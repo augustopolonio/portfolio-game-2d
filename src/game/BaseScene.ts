@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 export const GAME_CONFIG = {
     PLAYER_SPEED: 100,
     CAMERA_ZOOM: 2,
+    TRANSITION_DURATION: 500,
 };
 
 export default abstract class BaseScene extends Phaser.Scene {
@@ -40,6 +41,7 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.cameras.main.setZoom(GAME_CONFIG.CAMERA_ZOOM);
         this.cameras.main.startFollow(this.player);
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+        this.cameras.main.fadeIn(GAME_CONFIG.TRANSITION_DURATION);
     }
 
     protected setupColliders(map: Phaser.Tilemaps.Tilemap) {
@@ -91,6 +93,13 @@ export default abstract class BaseScene extends Phaser.Scene {
         }
         
         this.currentInteractable = null;
+    }
+
+    protected transitionToScene(sceneName: string, data?: any) {
+        this.cameras.main.fadeOut(GAME_CONFIG.TRANSITION_DURATION);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.start(sceneName, data);
+        });
     }
 
     protected abstract handleInteraction(obj: any): void;
