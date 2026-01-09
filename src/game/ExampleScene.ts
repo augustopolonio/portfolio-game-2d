@@ -101,11 +101,12 @@ export default class ExampleScene extends Phaser.Scene {
         // Camera setup
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.startFollow(this.player);
+        this.cameras.main.zoom = 2;
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     }
 
     update() {
-        const speed = 160;
+        const speed = 100;
         
         this.player.setVelocity(0);
         
