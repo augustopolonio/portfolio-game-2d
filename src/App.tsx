@@ -1,5 +1,5 @@
 import PhaserGame from './components/PhaserGame';
-import './App.css'; // Your existing CSS
+import './App.css';
 
 function App() {
   return (

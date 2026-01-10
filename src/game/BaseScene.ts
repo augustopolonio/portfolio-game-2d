@@ -11,6 +11,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected wasd!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key };
     protected eKey!: Phaser.Input.Keyboard.Key;
     protected currentInteractable: any = null;
+    private lastInteractState = false;
 
     init(data: { spawnLocation?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
@@ -74,23 +75,29 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     update() {
+        const mobileInput = this.registry.get('mobileInput') || { x: 0, y: 0, interact: false };
+        
         this.player.setVelocity(0);
         
-        if (this.wasd.A.isDown) {
+        if (this.wasd.A.isDown || mobileInput.x < -0.3) {
             this.player.setVelocityX(-GAME_CONFIG.PLAYER_SPEED);
-        } else if (this.wasd.D.isDown) {
+        } else if (this.wasd.D.isDown || mobileInput.x > 0.3) {
             this.player.setVelocityX(GAME_CONFIG.PLAYER_SPEED);
         }
         
-        if (this.wasd.W.isDown) {
+        if (this.wasd.W.isDown || mobileInput.y < -0.3) {
             this.player.setVelocityY(-GAME_CONFIG.PLAYER_SPEED);
-        } else if (this.wasd.S.isDown) {
+        } else if (this.wasd.S.isDown || mobileInput.y > 0.3) {
             this.player.setVelocityY(GAME_CONFIG.PLAYER_SPEED);
         }
         
-        if (Phaser.Input.Keyboard.JustDown(this.eKey) && this.currentInteractable) {
-            this.handleInteraction(this.currentInteractable);
+        if (Phaser.Input.Keyboard.JustDown(this.eKey) || (mobileInput.interact && !this.lastInteractState)) {
+            if (this.currentInteractable) {
+                this.handleInteraction(this.currentInteractable);
+            }
         }
+        
+        this.lastInteractState = mobileInput.interact;
         
         this.currentInteractable = null;
     }
