@@ -3,7 +3,7 @@
 #root {
   min-height: 100vh;
   margin: 0;
-  padding: 2rem;
+  /* padding: 2rem; */
   background: radial-gradient(circle at top, #1b2735, #090a0f);
   display: flex;
   justify-content: center;
