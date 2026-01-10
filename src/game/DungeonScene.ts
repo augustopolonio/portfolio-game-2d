@@ -1,34 +1,33 @@
 import Phaser from 'phaser';
 import BaseScene from './BaseScene';
+import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 
 export default class DungeonScene extends BaseScene {
     private closedChest!: Phaser.GameObjects.Image;
     private openChest!: Phaser.GameObjects.Image;
+    private mapConfig: MapConfig = {
+        tilesetFolder: 'P_P_FREE_RPG_TILESET',
+        tilesets: [
+            { name: 'Island_24x24', path: 'Island_24x24.png' },
+            { name: 'Dungeon_24x24', path: 'Dungeon_24x24.png' },
+            { name: 'example', path: 'example.png' },
+            { name: 'decor', path: 'decor.png' },
+            { name: 'decor_sheet', path: 'decor.png', spritesheet: { frameWidth: 24, frameHeight: 24 } },
+        ],
+        mapKey: 'dungeon_map',
+        mapPath: 'assets/tiled/maps/dungeon.json',
+    };
 
     constructor() {
         super('DungeonScene');
     }
 
     preload() {
-        this.load.image('Island_24x24', 'assets/P_P_FREE_RPG_TILESET/Island_24x24.png');
-        this.load.image('Dungeon_24x24', 'assets/P_P_FREE_RPG_TILESET/Dungeon_24x24.png');
-        this.load.image('example', 'assets/P_P_FREE_RPG_TILESET/example.png');
-        this.load.image('decor', 'assets/P_P_FREE_RPG_TILESET/decor.png');
-        this.load.spritesheet('decor_sheet', 'assets/P_P_FREE_RPG_TILESET/decor.png', { frameWidth: 24, frameHeight: 24 });
-        this.load.tilemapTiledJSON('dungeon_map', 'assets/tiled/maps/dungeon.json');
+        TiledMapLoader.loadMap(this, this.mapConfig);
     }
 
     create() {
-        const map = this.make.tilemap({ key: 'dungeon_map' });
-
-        const tileset1 = map.addTilesetImage('Island_24x24', 'Island_24x24');
-        const tileset2 = map.addTilesetImage('example', 'example');
-        const tileset3 = map.addTilesetImage('decor', 'decor');
-        const tileset4 = map.addTilesetImage('Dungeon_24x24', 'Dungeon_24x24');
-        
-        const tilesets = [tileset1, tileset2, tileset3, tileset4].filter(
-            (t): t is Phaser.Tilemaps.Tileset => t !== null
-        );
+        const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 
         map.createLayer('BaseMap', tilesets, 0, 0);
         
