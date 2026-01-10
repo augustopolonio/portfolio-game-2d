@@ -35,11 +35,10 @@ const PhaserGame = () => {
                 }
             },
             scale: {
-                mode: Phaser.Scale.FIT,
+                 mode: Phaser.Scale.FIT,
                 // autoCenter: Phaser.Scale.CENTER_BOTH,
-                autoRound: true,
-                width: 800,
-                height: 500,
+                // width: 800,
+                // height: 500,
             },
         };
 
@@ -59,9 +58,16 @@ const PhaserGame = () => {
     useEffect(() => {
         const handleResize = () => {
             setIsLandscape(window.innerWidth > window.innerHeight);
+            if (gameInstance.current) {
+                gameInstance.current.scale.refresh();
+            }
         };
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+        };
     }, []);
 
     useEffect(() => {
