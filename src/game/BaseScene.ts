@@ -4,7 +4,7 @@ export const GAME_CONFIG = {
     PLAYER_SPEED: 70,
     CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
-    //DEBUG_PHYSICS: true,
+    DEBUG_PHYSICS: false,
 };
 
 export default abstract class BaseScene extends Phaser.Scene {
@@ -137,29 +137,37 @@ export default abstract class BaseScene extends Phaser.Scene {
     update() {
         const mobileInput = this.registry.get('mobileInput') || { x: 0, y: 0, interact: false };
         
-        this.player.setVelocity(0);
-        
+        let velocityX = 0;
+        let velocityY = 0;
         let isMoving = false;
         
         if (this.wasd.A.isDown || mobileInput.x < -0.3) {
-            this.player.setVelocityX(-GAME_CONFIG.PLAYER_SPEED);
+            velocityX = -GAME_CONFIG.PLAYER_SPEED;
             this.lastDirection = 'left';
             isMoving = true;
         } else if (this.wasd.D.isDown || mobileInput.x > 0.3) {
-            this.player.setVelocityX(GAME_CONFIG.PLAYER_SPEED);
+            velocityX = GAME_CONFIG.PLAYER_SPEED;
             this.lastDirection = 'right';
             isMoving = true;
         }
         
         if (this.wasd.W.isDown || mobileInput.y < -0.3) {
-            this.player.setVelocityY(-GAME_CONFIG.PLAYER_SPEED);
+            velocityY = -GAME_CONFIG.PLAYER_SPEED;
             this.lastDirection = 'up';
             isMoving = true;
         } else if (this.wasd.S.isDown || mobileInput.y > 0.3) {
-            this.player.setVelocityY(GAME_CONFIG.PLAYER_SPEED);
+            velocityY = GAME_CONFIG.PLAYER_SPEED;
             this.lastDirection = 'down';
             isMoving = true;
         }
+        
+        // Normalize diagonal movement
+        if (velocityX !== 0 && velocityY !== 0) {
+            velocityX *= Math.SQRT1_2;
+            velocityY *= Math.SQRT1_2;
+        }
+        
+        this.player.setVelocity(velocityX, velocityY);
         
         // Update animation
         if (isMoving) {
