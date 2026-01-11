@@ -30,6 +30,8 @@ export default abstract class BaseScene extends Phaser.Scene {
         const spawnY = playerSpawn?.y || map.heightInPixels / 2;
         
         this.player = this.physics.add.sprite(spawnX, spawnY, 'player_idle', 0);
+        this.player.setScale(1.5); // Makes player 1.5x bigger (or 0.5 for smaller)
+
         this.player.setCollideWorldBounds(true);
         
         // Set physics body size to match actual character size (16x16)
