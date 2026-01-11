@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
 
+export interface PlayerConfig {
+    idlePath: string;
+    walkPath: string;
+    frameWidth: number;
+    frameHeight: number;
+}
+
 export interface TilesetConfig {
     name: string;
     path: string;
@@ -14,6 +21,17 @@ export interface MapConfig {
 }
 
 export class TiledMapLoader {
+    static loadPlayer(scene: Phaser.Scene, config: PlayerConfig) {
+        scene.load.spritesheet('player_idle', config.idlePath, { 
+            frameWidth: config.frameWidth, 
+            frameHeight: config.frameHeight 
+        });
+        scene.load.spritesheet('player_walk', config.walkPath, { 
+            frameWidth: config.frameWidth, 
+            frameHeight: config.frameHeight 
+        });
+    }
+
     static loadMap(scene: Phaser.Scene, config: MapConfig) {
         // Load all tilesets
         config.tilesets.forEach(tileset => {

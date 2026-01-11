@@ -1,5 +1,6 @@
 import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
+import { PLAYER_CONFIG } from './GameConfig';
 
 export default class IslandScene extends BaseScene {
     private mapConfig: MapConfig = {
@@ -19,6 +20,7 @@ export default class IslandScene extends BaseScene {
     }
 
     preload() {
+        TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
     }
 

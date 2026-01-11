@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 
 export const GAME_CONFIG = {
-    PLAYER_SPEED: 100,
-    CAMERA_ZOOM: 2,
+    PLAYER_SPEED: 70,
+    CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
+    //DEBUG_PHYSICS: true,
 };
 
 export default abstract class BaseScene extends Phaser.Scene {
@@ -12,18 +13,13 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected eKey!: Phaser.Input.Keyboard.Key;
     protected currentInteractable: any = null;
     private lastInteractState = false;
+    private lastDirection = 'down';
 
     init(data: { spawnLocation?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
     }
 
     protected setupPlayer(map: Phaser.Tilemaps.Tilemap) {
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x00ff00, 1);
-        graphics.fillRect(0, 0, 16, 16);
-        graphics.generateTexture('player', 16, 16);
-        graphics.destroy();
-        
         const spawnsLayer = map.getObjectLayer('Spawns');
         const spawnLocation = this.registry.get('spawnLocation') || 'player';
         const playerSpawn = spawnsLayer?.objects.find((obj: any) => 
@@ -33,8 +29,67 @@ export default abstract class BaseScene extends Phaser.Scene {
         const spawnX = playerSpawn?.x || map.widthInPixels / 2;
         const spawnY = playerSpawn?.y || map.heightInPixels / 2;
         
-        this.player = this.physics.add.sprite(spawnX, spawnY, 'player');
+        this.player = this.physics.add.sprite(spawnX, spawnY, 'player_idle', 0);
         this.player.setCollideWorldBounds(true);
+        
+        // Set physics body size to match actual character size (16x16)
+        this.player.body!.setSize(16, 16);
+        this.player.body!.setOffset(25, 25);
+        
+        // Create animations only if they don't exist
+        if (!this.anims.exists('idle_down')) {
+            this.anims.create({
+                key: 'idle_down',
+                frames: this.anims.generateFrameNumbers('player_idle', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'idle_left',
+                frames: this.anims.generateFrameNumbers('player_idle', { start: 4, end: 7 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'idle_right',
+                frames: this.anims.generateFrameNumbers('player_idle', { start: 8, end: 11 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'idle_up',
+                frames: this.anims.generateFrameNumbers('player_idle', { start: 12, end: 15 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            
+            this.anims.create({
+                key: 'walk_down',
+                frames: this.anims.generateFrameNumbers('player_walk', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'walk_left',
+                frames: this.anims.generateFrameNumbers('player_walk', { start: 4, end: 7 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'walk_right',
+                frames: this.anims.generateFrameNumbers('player_walk', { start: 8, end: 11 }),
+                frameRate: 8,
+                repeat: -1
+            });
+            this.anims.create({
+                key: 'walk_up',
+                frames: this.anims.generateFrameNumbers('player_walk', { start: 12, end: 15 }),
+                frameRate: 8,
+                repeat: -1
+            });
+        }
+        
+        this.player.play('idle_down');
     }
 
     protected setupCamera(map: Phaser.Tilemaps.Tilemap) {
@@ -43,6 +98,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.player);
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.fadeIn(GAME_CONFIG.TRANSITION_DURATION);
+        
+        // Enable debug rendering
+        if (GAME_CONFIG.DEBUG_PHYSICS) {
+            this.physics.world.createDebugGraphic();
+        }
     }
 
     protected setupColliders(map: Phaser.Tilemaps.Tilemap) {
@@ -79,16 +139,33 @@ export default abstract class BaseScene extends Phaser.Scene {
         
         this.player.setVelocity(0);
         
+        let isMoving = false;
+        
         if (this.wasd.A.isDown || mobileInput.x < -0.3) {
             this.player.setVelocityX(-GAME_CONFIG.PLAYER_SPEED);
+            this.lastDirection = 'left';
+            isMoving = true;
         } else if (this.wasd.D.isDown || mobileInput.x > 0.3) {
             this.player.setVelocityX(GAME_CONFIG.PLAYER_SPEED);
+            this.lastDirection = 'right';
+            isMoving = true;
         }
         
         if (this.wasd.W.isDown || mobileInput.y < -0.3) {
             this.player.setVelocityY(-GAME_CONFIG.PLAYER_SPEED);
+            this.lastDirection = 'up';
+            isMoving = true;
         } else if (this.wasd.S.isDown || mobileInput.y > 0.3) {
             this.player.setVelocityY(GAME_CONFIG.PLAYER_SPEED);
+            this.lastDirection = 'down';
+            isMoving = true;
+        }
+        
+        // Update animation
+        if (isMoving) {
+            this.player.play(`walk_${this.lastDirection}`, true);
+        } else {
+            this.player.play(`idle_${this.lastDirection}`, true);
         }
         
         if (Phaser.Input.Keyboard.JustDown(this.eKey) || (mobileInput.interact && !this.lastInteractState)) {

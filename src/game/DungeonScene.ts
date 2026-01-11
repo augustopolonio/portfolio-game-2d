@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
+import { PLAYER_CONFIG } from './GameConfig';
 
 export default class DungeonScene extends BaseScene {
     private closedChest!: Phaser.GameObjects.Image;
     private openChest!: Phaser.GameObjects.Image;
+    
     private mapConfig: MapConfig = {
         tilesetFolder: 'P_P_FREE_RPG_TILESET',
         tilesets: [
@@ -23,6 +25,7 @@ export default class DungeonScene extends BaseScene {
     }
 
     preload() {
+        TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
     }
 
