@@ -15,8 +15,9 @@ export default abstract class BaseScene extends Phaser.Scene {
     private lastInteractState = false;
     private lastDirection = 'down';
 
-    init(data: { spawnLocation?: string }) {
+    init(data: { spawnLocation?: string; playerDirection?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
+        this.registry.set('playerDirection', data.playerDirection || 'down');
     }
 
     protected setupPlayer(map: Phaser.Tilemaps.Tilemap) {
@@ -91,7 +92,9 @@ export default abstract class BaseScene extends Phaser.Scene {
             });
         }
         
-        this.player.play('idle_down');
+        const savedDirection = this.registry.get('playerDirection') || 'down';
+        this.lastDirection = savedDirection;
+        this.player.play(`idle_${savedDirection}`);
     }
 
     protected setupCamera(map: Phaser.Tilemaps.Tilemap) {
@@ -192,7 +195,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected transitionToScene(sceneName: string, data?: any) {
         this.cameras.main.fadeOut(GAME_CONFIG.TRANSITION_DURATION);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start(sceneName, data);
+            this.scene.start(sceneName, { ...data, playerDirection: this.lastDirection });
         });
     }
 
