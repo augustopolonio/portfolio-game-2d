@@ -66,17 +66,19 @@ export default class DungeonScene extends BaseScene {
             if (goToMap === 'island') {
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             }
-        } else if (obj.class === 'info') {
-            const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
-            console.log(`Info: ${text}`);
         } else if (obj.name === 'chest') {
             if (this.closedChest.visible) {
                 this.closedChest.setVisible(false);
                 this.openChest.setVisible(true);
-                console.log('Chest opened!');
+                this.showDialogue('Chest opened! Please read this important message: Thank you for playing this game. Have a great day! This chest is now empty.');
             } else {
-                console.log('Chest already open');
+                this.showDialogue('Chest already open');
             }
+        }
+        
+        const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
+        if (text) {
+            this.showDialogue(text);
         }
     }
 }

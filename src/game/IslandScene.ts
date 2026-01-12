@@ -49,9 +49,11 @@ export default class IslandScene extends BaseScene {
             if (goToMap === 'dungeon') {
                 this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
             }
-        } else if (obj.class === 'info') {
-            const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
-            console.log(`Info: ${text}`);
+        }
+        
+        const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
+        if (text) {
+            this.showDialogue(text);
         }
     }
 }

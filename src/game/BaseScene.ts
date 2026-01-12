@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
+import DialogueBox from './DialogueBox';
 
 export const GAME_CONFIG = {
-    PLAYER_SPEED: 70,
+    PLAYER_SPEED: 90,
     CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
     DEBUG_PHYSICS: false,
@@ -12,6 +13,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected wasd!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key };
     protected eKey!: Phaser.Input.Keyboard.Key;
     protected currentInteractable: any = null;
+    protected dialogueBox!: DialogueBox;
     private lastInteractState = false;
     private lastDirection = 'down';
 
@@ -137,10 +139,22 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected setupInput() {
         this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as any;
         this.eKey = this.input.keyboard!.addKey('E');
+        this.dialogueBox = new DialogueBox(this);
     }
 
     update() {
         const mobileInput = this.registry.get('mobileInput') || { x: 0, y: 0, interact: false };
+        
+        // If dialogue is showing, only handle closing it
+        if (this.dialogueBox.isShowing()) {
+            if (Phaser.Input.Keyboard.JustDown(this.eKey) || (mobileInput.interact && !this.lastInteractState)) {
+                if (!this.dialogueBox.advance()) {
+                    this.dialogueBox.hide();
+                }
+            }
+            this.lastInteractState = mobileInput.interact;
+            return;
+        }
         
         let velocityX = 0;
         let velocityY = 0;
@@ -190,6 +204,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.lastInteractState = mobileInput.interact;
         
         this.currentInteractable = null;
+    }
+
+    protected showDialogue(message: string) {
+        this.dialogueBox.show(message);
+        this.player.setVelocity(0, 0);
     }
 
     protected transitionToScene(sceneName: string, data?: any) {
