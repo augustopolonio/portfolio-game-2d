@@ -19,7 +19,7 @@ export default class DialogueBox {
     }
 
     private create() {
-        const width = 500;
+        const width = 600;
         const height = 100;
         
         this.background = this.scene.add.rectangle(0, 0, width, height, 0x000000, 0.6);
@@ -27,9 +27,12 @@ export default class DialogueBox {
         
         this.text = this.scene.add.text(0, 0, '', {
             fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#ffffff',
             align: 'left',
+            fixedWidth: width - 20,
+            fixedHeight: height - 20,
+            lineSpacing: 12,
             wordWrap: { width: width - 20 }
         });
         this.text.setOrigin(0.5);
@@ -67,7 +70,7 @@ export default class DialogueBox {
         this.text.setText('');
         
         this.typewriterEvent = this.scene.time.addEvent({
-            delay: 25,
+            delay: 20,
             callback: () => {
                 if (this.charIndex < this.fullText.length) {
                     this.text.setText(this.fullText.substring(0, this.charIndex + 1));
