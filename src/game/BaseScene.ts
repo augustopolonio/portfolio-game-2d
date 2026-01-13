@@ -281,11 +281,11 @@ export default abstract class BaseScene extends Phaser.Scene {
 
     protected abstract handleInteraction(obj: any): void;
     
-    protected onInteractableEnter(obj: any) {
+    protected onInteractableEnter(_obj: any) {
         // Override in child scenes
     }
     
-    protected onInteractableExit(obj: any) {
+    protected onInteractableExit(_obj: any) {
         // Override in child scenes
     }
 }
