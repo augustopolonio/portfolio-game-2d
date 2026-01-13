@@ -118,7 +118,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected setupColliders(map: Phaser.Tilemaps.Tilemap) {
         const collidersLayer = map.getObjectLayer('Colliders');
         collidersLayer?.objects.forEach((obj) => {
-            const collider = this.add.rectangle(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width, obj.height);
+            const collider = this.add.rectangle(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width!, obj.height!);
             this.physics.add.existing(collider, true);
             this.physics.add.collider(this.player, collider);
         });
@@ -127,7 +127,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected setupInteractables(map: Phaser.Tilemaps.Tilemap) {
         const interactablesLayer = map.getObjectLayer('Interactables');
         interactablesLayer?.objects.forEach((obj) => {
-            const zone = this.add.zone(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width, obj.height);
+            const zone = this.add.zone(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width!, obj.height!);
             this.physics.add.existing(zone);
             (zone.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
             (zone.body as Phaser.Physics.Arcade.Body).moves = false;
@@ -160,7 +160,7 @@ export default abstract class BaseScene extends Phaser.Scene {
                     ? tilesetName + '_sheet' 
                     : tilesetName;
                 
-                const sprite = this.add.sprite(obj.x, obj.y, textureKey, frameIndex);
+                const sprite = this.add.sprite(obj.x!, obj.y!, textureKey, frameIndex);
                 sprite.setOrigin(0, 1);
                 
                 // Store sprite by name for easy access
@@ -241,8 +241,8 @@ export default abstract class BaseScene extends Phaser.Scene {
         // Track which zones are currently overlapping
         const currentlyTouching = new Set<any>();
         
-        this.interactableZones.forEach((obj, zone) => {
-            const overlapping = this.physics.overlap(this.player, zone);
+        this.interactableZones.forEach((obj, _zone) => {
+            const overlapping = this.physics.overlap(this.player, _zone);
             
             if (overlapping) {
                 currentlyTouching.add(obj);
@@ -258,11 +258,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         });
         
         // Check for exits
-        this.activeInteractables.forEach(obj => {
-            if (!currentlyTouching.has(obj)) {
-                console.log('Exit:', obj.name);
-                this.activeInteractables.delete(obj);
-                this.onInteractableExit(obj);
+        this.activeInteractables.forEach(_obj => {
+            if (!currentlyTouching.has(_obj)) {
+                console.log('Exit:', _obj.name);
+                this.activeInteractables.delete(_obj);
+                this.onInteractableExit(_obj);
             }
         });
     }
