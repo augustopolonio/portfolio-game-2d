@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';

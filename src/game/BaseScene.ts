@@ -117,8 +117,8 @@ export default abstract class BaseScene extends Phaser.Scene {
 
     protected setupColliders(map: Phaser.Tilemaps.Tilemap) {
         const collidersLayer = map.getObjectLayer('Colliders');
-        collidersLayer?.objects.forEach((obj: any) => {
-            const collider = this.add.rectangle(obj.x + obj.width / 2, obj.y + obj.height / 2, obj.width, obj.height);
+        collidersLayer?.objects.forEach((obj) => {
+            const collider = this.add.rectangle(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width, obj.height);
             this.physics.add.existing(collider, true);
             this.physics.add.collider(this.player, collider);
         });
@@ -126,8 +126,8 @@ export default abstract class BaseScene extends Phaser.Scene {
 
     protected setupInteractables(map: Phaser.Tilemaps.Tilemap) {
         const interactablesLayer = map.getObjectLayer('Interactables');
-        interactablesLayer?.objects.forEach((obj: any) => {
-            const zone = this.add.zone(obj.x + obj.width / 2, obj.y + obj.height / 2, obj.width, obj.height);
+        interactablesLayer?.objects.forEach((obj) => {
+            const zone = this.add.zone(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width, obj.height);
             this.physics.add.existing(zone);
             (zone.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
             (zone.body as Phaser.Physics.Arcade.Body).moves = false;
@@ -139,7 +139,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     
     protected setupObjects(map: Phaser.Tilemaps.Tilemap) {
         const objectsLayer = map.getObjectLayer('Objects/Objects');
-        objectsLayer?.objects.forEach((obj: any) => {
+        objectsLayer?.objects.forEach((obj) => {
             if (obj.gid) {
                 let tilesetName = '';
                 let frameIndex = 0;
