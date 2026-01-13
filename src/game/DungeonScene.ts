@@ -2,10 +2,12 @@ import Phaser from 'phaser';
 import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
+import OutlineEffect from './OutlineEffect';
 
 export default class DungeonScene extends BaseScene {
     private closedChest!: Phaser.GameObjects.Image;
     private openChest!: Phaser.GameObjects.Image;
+    private chestOutlineActive = false;
     
     private mapConfig: MapConfig = {
         tilesetFolder: 'P_P_FREE_RPG_TILESET',
@@ -30,6 +32,7 @@ export default class DungeonScene extends BaseScene {
     }
 
     create() {
+        OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 
         map.createLayer('BaseMap', tilesets, 0, 0);
@@ -79,6 +82,20 @@ export default class DungeonScene extends BaseScene {
         const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
         if (text) {
             this.showDialogue(text);
+        }
+    }
+    
+    protected onInteractableEnter(obj: any) {
+        if (obj.name === 'chest' && this.closedChest) {
+            console.log('Entered chest zone');
+            OutlineEffect.apply(this.closedChest);
+        }
+    }
+    
+    protected onInteractableExit(obj: any) {
+        if (obj.name === 'chest' && this.closedChest) {
+            console.log('Exited chest zone');
+            OutlineEffect.remove(this.closedChest);
         }
     }
 }

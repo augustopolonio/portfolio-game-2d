@@ -16,6 +16,8 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected dialogueBox!: DialogueBox;
     private lastInteractState = false;
     private lastDirection = 'down';
+    private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
+    private activeInteractables = new Set<any>();
 
     init(data: { spawnLocation?: string; playerDirection?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
@@ -126,13 +128,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         interactablesLayer?.objects.forEach((obj: any) => {
             const zone = this.add.zone(obj.x + obj.width / 2, obj.y + obj.height / 2, obj.width, obj.height);
             this.physics.add.existing(zone);
+            (zone.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
+            (zone.body as Phaser.Physics.Arcade.Body).moves = false;
             
-            this.physics.add.overlap(this.player, zone, () => {
-                if (!this.currentInteractable) {
-                    console.log(`Entered interactable: ${obj.name || obj.type || 'unnamed'}`);
-                }
-                this.currentInteractable = obj;
-            });
+            this.interactableZones.set(zone, obj);
+            this.physics.add.overlap(this.player, zone);
         });
     }
 
@@ -203,7 +203,33 @@ export default abstract class BaseScene extends Phaser.Scene {
         
         this.lastInteractState = mobileInput.interact;
         
-        this.currentInteractable = null;
+        // Track which zones are currently overlapping
+        const currentlyTouching = new Set<any>();
+        
+        this.interactableZones.forEach((obj, zone) => {
+            const overlapping = this.physics.overlap(this.player, zone);
+            
+            if (overlapping) {
+                currentlyTouching.add(obj);
+                this.currentInteractable = obj;
+                
+                // Enter if not previously active
+                if (!this.activeInteractables.has(obj)) {
+                    console.log('Enter:', obj.name);
+                    this.activeInteractables.add(obj);
+                    this.onInteractableEnter(obj);
+                }
+            }
+        });
+        
+        // Check for exits
+        this.activeInteractables.forEach(obj => {
+            if (!currentlyTouching.has(obj)) {
+                console.log('Exit:', obj.name);
+                this.activeInteractables.delete(obj);
+                this.onInteractableExit(obj);
+            }
+        });
     }
 
     protected showDialogue(message: string) {
@@ -219,4 +245,12 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     protected abstract handleInteraction(obj: any): void;
+    
+    protected onInteractableEnter(obj: any) {
+        // Override in child scenes
+    }
+    
+    protected onInteractableExit(obj: any) {
+        // Override in child scenes
+    }
 }
