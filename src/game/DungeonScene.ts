@@ -5,10 +5,6 @@ import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
 
 export default class DungeonScene extends BaseScene {
-    private closedChest!: Phaser.GameObjects.Image;
-    private openChest!: Phaser.GameObjects.Image;
-    private chestOutlineActive = false;
-    
     private mapConfig: MapConfig = {
         tilesetFolder: 'P_P_FREE_RPG_TILESET',
         tilesets: [
@@ -42,17 +38,8 @@ export default class DungeonScene extends BaseScene {
             map.createLayer('Objects/TiledObjects', tilesets, 0, 0);
         }
         
-        const objectsLayer = map.getObjectLayer('Objects/Objects');
-        objectsLayer?.objects.forEach((obj: any) => {
-            if (obj.name === 'closed_chest') {
-                this.closedChest = this.add.sprite(obj.x, obj.y, 'decor_sheet', 1);
-                this.closedChest.setOrigin(0, 1);
-            } else if (obj.name === 'open_chest') {
-                this.openChest = this.add.sprite(obj.x, obj.y, 'decor_sheet', 4);
-                this.openChest.setOrigin(0, 1);
-                this.openChest.setVisible(false);
-            }
-        });
+        this.setupObjects(map);
+        this.objectSprites.get('open_chest')?.setVisible(false);
         
         this.setupPlayer(map);
         this.setupColliders(map);
@@ -70,9 +57,12 @@ export default class DungeonScene extends BaseScene {
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'chest') {
-            if (this.closedChest.visible) {
-                this.closedChest.setVisible(false);
-                this.openChest.setVisible(true);
+            const closedChest = this.objectSprites.get('closed_chest');
+            const openChest = this.objectSprites.get('open_chest');
+            
+            if (closedChest?.visible) {
+                closedChest.setVisible(false);
+                openChest?.setVisible(true);
                 this.showDialogue('Chest opened! Please read this important message: Thank you for playing this game. Have a great day! This chest is now empty.');
             } else {
                 this.showDialogue('Chest already open');
@@ -86,16 +76,20 @@ export default class DungeonScene extends BaseScene {
     }
     
     protected onInteractableEnter(obj: any) {
-        if (obj.name === 'chest' && this.closedChest) {
-            console.log('Entered chest zone');
-            OutlineEffect.apply(this.closedChest);
+        if (obj.name === 'chest') {
+            const sprite = this.objectSprites.get('closed_chest');
+            if (sprite) {
+                OutlineEffect.apply(sprite);
+            }
         }
     }
     
     protected onInteractableExit(obj: any) {
-        if (obj.name === 'chest' && this.closedChest) {
-            console.log('Exited chest zone');
-            OutlineEffect.remove(this.closedChest);
+        if (obj.name === 'chest') {
+            const sprite = this.objectSprites.get('closed_chest');
+            if (sprite) {
+                OutlineEffect.remove(sprite);
+            }
         }
     }
 }

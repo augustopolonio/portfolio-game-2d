@@ -18,6 +18,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     private lastDirection = 'down';
     private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
     private activeInteractables = new Set<any>();
+    protected objectSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
 
     init(data: { spawnLocation?: string; playerDirection?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
@@ -133,6 +134,40 @@ export default abstract class BaseScene extends Phaser.Scene {
             
             this.interactableZones.set(zone, obj);
             this.physics.add.overlap(this.player, zone);
+        });
+    }
+    
+    protected setupObjects(map: Phaser.Tilemaps.Tilemap) {
+        const objectsLayer = map.getObjectLayer('Objects/Objects');
+        objectsLayer?.objects.forEach((obj: any) => {
+            if (obj.gid) {
+                let tilesetName = '';
+                let frameIndex = 0;
+                
+                for (const tileset of map.tilesets) {
+                    const firstGid = tileset.firstgid;
+                    const lastGid = firstGid + tileset.total - 1;
+                    
+                    if (obj.gid >= firstGid && obj.gid <= lastGid) {
+                        tilesetName = tileset.name;
+                        frameIndex = obj.gid - firstGid;
+                        break;
+                    }
+                }
+                
+                // Use _sheet suffix for spritesheet version if tileset has both
+                const textureKey = this.textures.exists(tilesetName + '_sheet') 
+                    ? tilesetName + '_sheet' 
+                    : tilesetName;
+                
+                const sprite = this.add.sprite(obj.x, obj.y, textureKey, frameIndex);
+                sprite.setOrigin(0, 1);
+                
+                // Store sprite by name for easy access
+                if (obj.name) {
+                    this.objectSprites.set(obj.name, sprite);
+                }
+            }
         });
     }
 
