@@ -11,7 +11,10 @@ export default class IslandScene extends BaseScene {
             { name: 'Dungeon_24x24', path: 'Dungeon_24x24.png' },
             { name: 'example', path: 'example.png' },
             { name: 'decor', path: 'decor.png' },
+            // Add sheets to use loose tiles
             { name: 'decor_sheet', path: 'decor.png', spritesheet: { frameWidth: 24, frameHeight: 24 } },
+            { name: 'Dungeon_24x24_sheet', path: 'Dungeon_24x24.png', spritesheet: { frameWidth: 24, frameHeight: 24 } },
+            { name: 'example_sheet', path: 'example.png', spritesheet: { frameWidth: 24, frameHeight: 24 } },
         ],
         mapKey: 'island_map',
         mapPath: 'assets/tiled/maps/island.json',

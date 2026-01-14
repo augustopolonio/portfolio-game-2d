@@ -41,8 +41,8 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
         
         // Set physics body size to match actual character size (16x16)
-        this.player.body!.setSize(16, 16);
-        this.player.body!.setOffset(25, 25);
+        this.player.body!.setSize(10, 10);
+        this.player.body!.setOffset(28, 30);
         
         // Create animations only if they don't exist
         if (!this.anims.exists('idle_down')) {
