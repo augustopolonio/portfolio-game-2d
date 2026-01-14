@@ -26,6 +26,7 @@ const PhaserGame = () => {
             backgroundColor: '#2d2d2d',
             parent: gameContainer.current,
             pixelArt: true,
+            roundPixels: true,
             scene: [DungeonScene, IslandScene],
             physics: {
                 default: 'arcade',

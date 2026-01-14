@@ -105,7 +105,8 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected setupCamera(map: Phaser.Tilemaps.Tilemap) {
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.setZoom(GAME_CONFIG.CAMERA_ZOOM);
-        this.cameras.main.startFollow(this.player);
+        this.cameras.main.startFollow(this.player, true);
+        this.cameras.main.roundPixels = true;
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.fadeIn(GAME_CONFIG.TRANSITION_DURATION);
         
