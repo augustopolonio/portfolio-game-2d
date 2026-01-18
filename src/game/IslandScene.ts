@@ -41,6 +41,7 @@ export default class IslandScene extends BaseScene {
         }
         
         this.setupObjects(map);
+        this.objectSprites.get('open_chest')?.setVisible(false);
         this.setupPlayer(map);
         this.setupColliders(map);
         this.setupInteractables(map);
@@ -56,11 +57,23 @@ export default class IslandScene extends BaseScene {
             if (goToMap === 'dungeon') {
                 this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
             }
+        } else if (obj.name === 'chest') {
+            const closedChest = this.objectSprites.get('closed_chest');
+            const openChest = this.objectSprites.get('open_chest');
+            
+            if (closedChest?.visible) {
+                closedChest.setVisible(false);
+                openChest?.setVisible(true);
+            } else {
+                return;
+            }
         }
         
         const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
         if (text) {
-            this.showDialogue(text);
+            const keyWord = obj.properties?.find((p: any) => p.name === 'key_word')?.value;
+            const keyWordColor = obj.properties?.find((p: any) => p.name === 'key_word_color')?.value;
+            this.showDialogue({ text, keyWord, keyWordColor });
         }
     }
     

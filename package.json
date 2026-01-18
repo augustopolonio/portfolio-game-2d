@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "phaser": "^3.87.0",
+    "phaser3-rex-plugins": "^1.80.17",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

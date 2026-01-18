@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import DialogueBox from './DialogueBox';
+import DialogueBox, { type DialogueOptions } from './DialogueBox';
 
 export const GAME_CONFIG = {
     PLAYER_SPEED: 90,
@@ -268,8 +268,8 @@ export default abstract class BaseScene extends Phaser.Scene {
         });
     }
 
-    protected showDialogue(message: string) {
-        this.dialogueBox.show(message);
+    protected showDialogue(messageOrOptions: string | DialogueOptions) {
+        this.dialogueBox.show(messageOrOptions);
         this.player.setVelocity(0, 0);
     }
 

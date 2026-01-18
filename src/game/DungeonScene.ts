@@ -45,6 +45,15 @@ export default class DungeonScene extends BaseScene {
         this.setupInteractables(map);
         this.setupInput();
         this.setupCamera(map);
+
+        // Test for BBCode Text
+        this.input.keyboard?.on('keydown-T', () => {
+             this.showDialogue({
+                text: "This is a test message. The {0} is colored!",
+                keyWord: "magic word",
+                keyWordColor: "#00ff00"
+             });
+        });
     }
     
     protected handleInteraction(obj: any) {
@@ -70,7 +79,9 @@ export default class DungeonScene extends BaseScene {
         
         const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
         if (text) {
-            this.showDialogue(text);
+            const keyWord = obj.properties?.find((p: any) => p.name === 'key_word')?.value;
+            const keyWordColor = obj.properties?.find((p: any) => p.name === 'key_word_color')?.value;
+            this.showDialogue({ text, keyWord, keyWordColor });
         }
     }
     

@@ -1195,8 +1195,8 @@
                  "type":"",
                  "visible":true,
                  "width":16.7273,
-                 "x":751.454531818182,
-                 "y":827.181827272727
+                 "x":747.579531818182,
+                 "y":827.931827272727
                 }, 
                 {
                  "height":43.9999333333334,
@@ -1365,6 +1365,16 @@
                  "name":"chest",
                  "properties":[
                         {
+                         "name":"key_word",
+                         "type":"string",
+                         "value":"Projects Castle"
+                        }, 
+                        {
+                         "name":"key_word_color",
+                         "type":"color",
+                         "value":"#ff008000"
+                        }, 
+                        {
                          "name":"text",
                          "type":"string",
                          "value":"You find the {0} key!"
@@ -1375,6 +1385,44 @@
                  "width":20.2727272727273,
                  "x":193.272727272727,
                  "y":917.723468181818
+                }, 
+                {
+                 "height":18.3636,
+                 "id":199,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16.3636,
+                 "x":511.44775,
+                 "y":660.7897
+                }, 
+                {
+                 "height":17.3636,
+                 "id":200,
+                 "name":"under_construction_info",
+                 "properties":[
+                        {
+                         "name":"key_word",
+                         "type":"string",
+                         "value":"Projects Castle"
+                        }, 
+                        {
+                         "name":"key_word_color",
+                         "type":"color",
+                         "value":"#ff008000"
+                        }, 
+                        {
+                         "name":"text",
+                         "type":"string",
+                         "value":"Welcome to {0} castle! Explore all the games that I built."
+                        }],
+                 "rotation":0,
+                 "type":"info",
+                 "visible":true,
+                 "width":16.6420000000001,
+                 "x":511.14775,
+                 "y":671.2217
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1430,7 +1478,7 @@
          "y":0
         }],
  "nextlayerid":14,
- "nextobjectid":199,
+ "nextobjectid":201,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

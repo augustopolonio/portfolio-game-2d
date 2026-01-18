@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Phaser from 'phaser';
+import BBCodeTextPlugin from 'phaser3-rex-plugins/plugins/bbcodetext-plugin.js';
 import DungeonScene from '../game/DungeonScene';
 import IslandScene from '../game/IslandScene';
 import MobileControls from './MobileControls';
@@ -27,6 +28,13 @@ const PhaserGame = () => {
             parent: gameContainer.current,
             pixelArt: true,
             roundPixels: true,
+            plugins: {
+                global: [{
+                    key: 'rexBBCodeTextPlugin',
+                    plugin: BBCodeTextPlugin,
+                    start: true
+                }]
+            },
             scene: [DungeonScene, IslandScene],
             physics: {
                 default: 'arcade',
