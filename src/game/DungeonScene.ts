@@ -30,19 +30,36 @@ export default class DungeonScene extends BaseScene {
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 
-        map.createLayer('BaseMap', tilesets, 0, 0);
-        
-        const tiledObjectsLayer = map.getLayer('Objects/TiledObjects');
+        // 1. Below Layer (Ground)
+        map.createLayer('Below/BaseMap', tilesets, 0, 0);
+
+        // 2. Below Layer (Decorations that are always below)
+        const tiledObjectsLayer = map.getLayer('Below/TiledObjects');
         if (tiledObjectsLayer) {
-            map.createLayer('Objects/TiledObjects', tilesets, 0, 0);
+            map.createLayer('Below/TiledObjects', tilesets, 0, 0);
+        }
+
+        // 3. Same Layer (Base objects like trunks - rendered flat before objects)
+        const objectsBaseLayer = map.getLayer('Same/ObjectsBase');
+        if (objectsBaseLayer) {
+            map.createLayer('Same/ObjectsBase', tilesets, 0, 0);
+        }
+
+        // 4. Player & Active Objects (Y-Sorted)
+        this.setupPlayer(map);
+        this.setupObjects(map); // Loads 'Same/Objects'
+
+        // 5. Above Layer (Tree tops - always on top)
+        const objectsTopLayer = map.getLayer('Above/ObjectsTop');
+        if (objectsTopLayer) {
+            const topLayer = map.createLayer('Above/ObjectsTop', tilesets, 0, 0);
+            topLayer?.setDepth(map.heightInPixels + 1000); // Ensure it's above everything
         }
         
-        this.setupObjects(map);
         this.objectSprites.get('open_chest')?.setVisible(false);
         
-        this.setupPlayer(map);
-        this.setupColliders(map);
-        this.setupInteractables(map);
+        this.setupColliders(map); // 'System/Colliders'
+        this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
 

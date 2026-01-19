@@ -26,7 +26,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     protected setupPlayer(map: Phaser.Tilemaps.Tilemap) {
-        const spawnsLayer = map.getObjectLayer('Spawns');
+        const spawnsLayer = map.getObjectLayer('System/Spawns');
         const spawnLocation = this.registry.get('spawnLocation') || 'player';
         const playerSpawn = spawnsLayer?.objects.find((obj: any) => 
             (obj.type === 'start_position' && obj.name === spawnLocation) ||
@@ -36,6 +36,7 @@ export default abstract class BaseScene extends Phaser.Scene {
         const spawnY = playerSpawn?.y || map.heightInPixels / 2;
         
         this.player = this.physics.add.sprite(spawnX, spawnY, 'player_idle', 0);
+        this.player.setDepth(this.player.y);
         this.player.setScale(1.5); // Makes player 1.5x bigger (or 0.5 for smaller)
 
         this.player.setCollideWorldBounds(true);
@@ -117,7 +118,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     protected setupColliders(map: Phaser.Tilemaps.Tilemap) {
-        const collidersLayer = map.getObjectLayer('Colliders');
+        const collidersLayer = map.getObjectLayer('System/Colliders');
         collidersLayer?.objects.forEach((obj) => {
             const collider = this.add.rectangle(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width!, obj.height!);
             this.physics.add.existing(collider, true);
@@ -126,7 +127,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     protected setupInteractables(map: Phaser.Tilemaps.Tilemap) {
-        const interactablesLayer = map.getObjectLayer('Interactables');
+        const interactablesLayer = map.getObjectLayer('System/Interactables');
         interactablesLayer?.objects.forEach((obj) => {
             const zone = this.add.zone(obj.x! + obj.width! / 2, obj.y! + obj.height! / 2, obj.width!, obj.height!);
             this.physics.add.existing(zone);
@@ -139,7 +140,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
     
     protected setupObjects(map: Phaser.Tilemaps.Tilemap) {
-        const objectsLayer = map.getObjectLayer('Objects/Objects');
+        const objectsLayer = map.getObjectLayer('Same/Objects');
         objectsLayer?.objects.forEach((obj) => {
             if (obj.gid) {
                 let tilesetName = '';
@@ -163,6 +164,7 @@ export default abstract class BaseScene extends Phaser.Scene {
                 
                 const sprite = this.add.sprite(obj.x!, obj.y!, textureKey, frameIndex);
                 sprite.setOrigin(0, 1);
+                sprite.setDepth(sprite.y);
                 
                 // Store sprite by name for easy access
                 if (obj.name) {
@@ -222,6 +224,7 @@ export default abstract class BaseScene extends Phaser.Scene {
             velocityY *= Math.SQRT1_2;
         }
         
+        this.player.setDepth(this.player.y);
         this.player.setVelocity(velocityX, velocityY);
         
         // Update animation
