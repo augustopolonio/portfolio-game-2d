@@ -1278,14 +1278,14 @@
                          "y":551.958333333333
                         }, 
                         {
-                         "height":113.600233333333,
+                         "height":117.679778787879,
                          "id":202,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":143.583,
-                         "x":406.875166666667,
+                         "width":143.821636363636,
+                         "x":408.000166666667,
                          "y":554.533216666667
                         }, 
                         {
@@ -1706,6 +1706,28 @@
                          "width":16.7273,
                          "x":819.88635,
                          "y":815.9375
+                        }, 
+                        {
+                         "height":17.5871363636364,
+                         "id":242,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16.6363454545454,
+                         "x":511.075766666667,
+                         "y":661.357946969697
+                        }, 
+                        {
+                         "height":19.0416454545453,
+                         "id":243,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16.6363,
+                         "x":728.954577272727,
+                         "y":537.20645
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1841,17 +1863,6 @@
                          "y":917.723468181818
                         }, 
                         {
-                         "height":18.3636,
-                         "id":199,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16.3636,
-                         "x":511.44775,
-                         "y":660.7897
-                        }, 
-                        {
                          "height":17.3636,
                          "id":200,
                          "name":"under_construction_info",
@@ -1859,12 +1870,12 @@
                                 {
                                  "name":"key_word",
                                  "type":"string",
-                                 "value":"Projects Castle"
+                                 "value":"Projects"
                                 }, 
                                 {
                                  "name":"key_word_color",
                                  "type":"color",
-                                 "value":"#ff008000"
+                                 "value":"#ff6fbf5e"
                                 }, 
                                 {
                                  "name":"text",
@@ -1877,6 +1888,33 @@
                          "width":16.6420000000001,
                          "x":511.14775,
                          "y":671.2217
+                        }, 
+                        {
+                         "height":17.3636,
+                         "id":244,
+                         "name":"experience_info",
+                         "properties":[
+                                {
+                                 "name":"key_word",
+                                 "type":"string",
+                                 "value":"Experience"
+                                }, 
+                                {
+                                 "name":"key_word_color",
+                                 "type":"color",
+                                 "value":"#ff3e7fb6"
+                                }, 
+                                {
+                                 "name":"text",
+                                 "type":"string",
+                                 "value":"Welcome to the castle {0}! Explore all the companies I've worked for."
+                                }],
+                         "rotation":0,
+                         "type":"info",
+                         "visible":true,
+                         "width":16.642,
+                         "x":729.315363636364,
+                         "y":545.863654545455
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1939,7 +1977,7 @@
          "y":0
         }],
  "nextlayerid":19,
- "nextobjectid":242,
+ "nextobjectid":245,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

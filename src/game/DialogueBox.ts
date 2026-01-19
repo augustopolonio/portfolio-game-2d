@@ -66,7 +66,7 @@ export default class DialogueBox {
         this.container = this.scene.add.container(0, 0);
         this.container.add([this.background, this.text]);
         this.container.setScrollFactor(0);
-        this.container.setDepth(1000);
+        this.container.setDepth(3000); // Always on top of everything (UI layer)
         this.container.setVisible(false);
     }
 
