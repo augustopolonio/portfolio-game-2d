@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import BBCodeTextPlugin from 'phaser3-rex-plugins/plugins/bbcodetext-plugin.js';
 import DungeonScene from '../game/DungeonScene';
 import IslandScene from '../game/IslandScene';
+import HUDScene from '../game/HUDScene';
 import MobileControls from './MobileControls';
 import './PhaserGame.css';
 
@@ -35,7 +36,7 @@ const PhaserGame = () => {
                     start: true
                 }]
             },
-            scene: [DungeonScene, IslandScene],
+            scene: [DungeonScene, IslandScene, HUDScene],
             physics: {
                 default: 'arcade',
                 arcade: {

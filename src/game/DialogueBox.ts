@@ -4,6 +4,7 @@ export interface DialogueOptions {
     text: string;
     keyWord?: string;
     keyWordColor?: string; // hex color string like '#ff0000'
+    onClose?: () => void;
 }
 
 export default class DialogueBox {
@@ -19,6 +20,7 @@ export default class DialogueBox {
     private charIndex = 0;
     private typewriterEvent?: Phaser.Time.TimerEvent;
     private visibleIndexToFormattedIndex: number[] = [];
+    private onClose?: () => void;
     
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -174,9 +176,11 @@ export default class DialogueBox {
 
     show(messageOrOptions: string | DialogueOptions) {
         console.log('DialogueBox.show called with:', messageOrOptions);
-        const { text, keyWord, keyWordColor } = typeof messageOrOptions === 'string'
-            ? { text: messageOrOptions, keyWord: undefined, keyWordColor: undefined }
+        const { text, keyWord, keyWordColor, onClose } = typeof messageOrOptions === 'string'
+            ? { text: messageOrOptions, keyWord: undefined, keyWordColor: undefined, onClose: undefined }
             : messageOrOptions;
+        
+        this.onClose = onClose;
 
         const gameWidth = this.scene.game.scale.width;
         const gameHeight = this.scene.game.scale.height;
@@ -244,6 +248,10 @@ export default class DialogueBox {
         this.container.setVisible(false);
         this.isVisible = false;
         this.isTyping = false;
+        if (this.onClose) {
+            this.onClose();
+            this.onClose = undefined;
+        }
     }
 
     isShowing() {

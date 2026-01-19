@@ -67,20 +67,81 @@ export default class IslandScene extends BaseScene {
     }
     
     protected handleInteraction(obj: any) {
+        let onCloseCallback: (() => void) | undefined;
+
         if (obj.type === 'door') {
+            const locked = obj.properties?.find((p: any) => p.name === 'locked')?.value;
+            
+            if (locked) {
+                const keyColor = obj.properties?.find((p: any) => p.name === 'key_color')?.value;
+                const inventory = this.registry.get('inventory') || [];
+                // Assuming inventory stores items as 'blue_key'
+                const requiredKey = `${keyColor}_key`;
+                
+                if (!inventory.includes(requiredKey)) {
+                    this.showDialogue(`Locked! You need the ${keyColor} key.`);
+                    return;
+                }
+            }
+
             const goToMap = obj.properties?.find((p: any) => p.name === 'go_to_map')?.value;
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
             
             if (goToMap === 'dungeon') {
                 this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
             }
-        } else if (obj.name === 'chest') {
+        } else if (obj.name === 'projects_chest') {
             const closedChest = this.objectSprites.get('closed_chest');
             const openChest = this.objectSprites.get('open_chest');
             
             if (closedChest?.visible) {
                 closedChest.setVisible(false);
                 openChest?.setVisible(true);
+
+                // Added key animation
+                if (openChest) {
+                    // Blue key frame ID is 42
+                    const keySprite = this.add.sprite(openChest.x + openChest.width / 2, openChest.y - openChest.height / 2, 'decor_sheet', 42);
+                    keySprite.setOrigin(0.5, 0.5);
+                    keySprite.setDepth(openChest.depth + 1);
+
+                    this.tweens.add({
+                        targets: keySprite,
+                        y: keySprite.y - 20,
+                        duration: 1000,
+                        ease: 'Power2'
+                    });
+                    
+                    onCloseCallback = () => {
+                        // Target position calculation considering camera zoom and scroll
+                        // The HUD icon is at (Width - 40, 40) in screen coordinates
+                        const camera = this.cameras.main;
+                        const zoom = camera.zoom;
+                        
+                        // Map screen coordinate to world coordinate
+                        // Use worldView.right/top for safer bounds calculation
+                        const targetX = camera.worldView.right - (50 / zoom);
+                        const targetY = camera.worldView.top + (50 / zoom);
+                        
+                        this.tweens.add({
+                            targets: keySprite,
+                            x: targetX,
+                            y: targetY,
+                            scaleX: 0.5,
+                            scaleY: 0.5,
+                            duration: 800,
+                            ease: 'Back.In',
+                            onComplete: () => {
+                                keySprite.destroy();
+                                // Update inventory
+                                const currentInventory = this.registry.get('inventory') || [];
+                                if (!currentInventory.includes('blue_key')) {
+                                    this.registry.set('inventory', [...currentInventory, 'blue_key']);
+                                }
+                            }
+                        });
+                    };
+                }
             } else {
                 return;
             }
@@ -90,7 +151,7 @@ export default class IslandScene extends BaseScene {
         if (text) {
             const keyWord = obj.properties?.find((p: any) => p.name === 'key_word')?.value;
             const keyWordColor = obj.properties?.find((p: any) => p.name === 'key_word_color')?.value;
-            this.showDialogue({ text, keyWord, keyWordColor });
+            this.showDialogue({ text, keyWord, keyWordColor, onClose: onCloseCallback });
         }
     }
     
