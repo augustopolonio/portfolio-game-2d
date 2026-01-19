@@ -4,15 +4,7 @@ export default class HUDScene extends Phaser.Scene {
     private keyIcon!: Phaser.GameObjects.Sprite;
 
     constructor() {
-        super({ key: 'HUDScene', active: true });
-    }
-
-    preload() {
-        // Preload assets here too, to ensure HUD has them even if Scene 1 is still loading
-        this.load.spritesheet('decor_sheet', 'assets/P_P_FREE_RPG_TILESET/decor.png', { 
-            frameWidth: 24, 
-            frameHeight: 24 
-        });
+        super({ key: 'HUDScene', active: false });
     }
 
     create() {

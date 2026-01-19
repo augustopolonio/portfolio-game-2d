@@ -27,6 +27,7 @@ export default class DungeonScene extends BaseScene {
     }
 
     create() {
+        this.scene.launch('HUDScene');
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 

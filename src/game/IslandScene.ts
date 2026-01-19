@@ -30,6 +30,7 @@ export default class IslandScene extends BaseScene {
     }
 
     create() {
+        this.scene.launch('HUDScene');
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 
