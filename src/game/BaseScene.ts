@@ -244,6 +244,7 @@ export default abstract class BaseScene extends Phaser.Scene {
         
         // Track which zones are currently overlapping
         const currentlyTouching = new Set<any>();
+        this.currentInteractable = null;
         
         this.interactableZones.forEach((obj, _zone) => {
             const overlapping = this.physics.overlap(this.player, _zone);
