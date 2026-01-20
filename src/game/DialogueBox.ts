@@ -29,7 +29,7 @@ export default class DialogueBox {
 
     private create() {
         const width = 600;
-        const height = 100;
+        const height = 90;
         
         this.background = this.scene.add.rectangle(0, 0, width, height, 0x000000, 0.6);
         this.background.setStrokeStyle(3, 0x6e84e7);
