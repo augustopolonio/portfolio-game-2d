@@ -65,6 +65,19 @@ export default class IslandScene extends BaseScene {
         this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
+
+        // Show welcome message on first game load
+        if (!this.registry.get('hasWelcomeShown')) {
+            this.time.delayedCall(500, () => {
+                const isDesktop = this.game.device.os.desktop;
+                const instructions = isDesktop 
+                    ? "Use the arrow keys to move (← ↑ → ↓) and press [E] to interact." 
+                    : "Use the on-screen buttons to move and interact.";
+
+                this.showDialogue(`Hello, traveler! Welcome to my village. Here you can explore my creations and experiences.|||${instructions}`);
+            });
+            this.registry.set('hasWelcomeShown', true);
+        }
     }
     
     protected handleInteraction(obj: any) {

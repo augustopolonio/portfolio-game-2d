@@ -74,6 +74,16 @@ export default class DialogueBox {
     }
 
     private paginateText(message: string): string[] {
+        // Handle manual page breaks
+        if (message.includes('|||')) {
+            const sections = message.split('|||');
+            let allPages: string[] = [];
+            for (const section of sections) {
+                allPages = allPages.concat(this.paginateText(section));
+            }
+            return allPages;
+        }
+
         const maxChars = 100;
         const pages: string[] = [];
         

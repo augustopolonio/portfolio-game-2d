@@ -93,6 +93,8 @@ const PhaserGame = () => {
                 onMove={(direction) => setMobileInput(prev => ({ ...prev, x: direction.x, y: direction.y }))}
                 onInteract={handleInteract}
             />
+             {/* Force font load */}
+             <div style={{ fontFamily: '"Press Start 2P"', position: 'absolute', opacity: 0, pointerEvents: 'none' }}>.</div>
         </div>
     );
 };
