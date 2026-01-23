@@ -36,7 +36,7 @@ const PhaserGame = () => {
                     start: true
                 }]
             },
-            scene: [DungeonScene, IslandScene, HUDScene],
+            scene: [IslandScene, DungeonScene, HUDScene],
             physics: {
                 default: 'arcade',
                 arcade: {

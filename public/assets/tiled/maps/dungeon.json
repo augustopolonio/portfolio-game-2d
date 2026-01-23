@@ -421,18 +421,6 @@
                  "objects":[
                         {
                          "height":0,
-                         "id":25,
-                         "name":"player",
-                         "point":true,
-                         "rotation":0,
-                         "type":"start_position",
-                         "visible":true,
-                         "width":0,
-                         "x":214.5,
-                         "y":178.833
-                        }, 
-                        {
-                         "height":0,
                          "id":31,
                          "name":"dungeon_door_exit",
                          "point":true,
