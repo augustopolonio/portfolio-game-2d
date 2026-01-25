@@ -14,11 +14,19 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected eKey!: Phaser.Input.Keyboard.Key;
     protected currentInteractable: any = null;
     protected dialogueBox!: DialogueBox;
+    protected movementLocked = false;
     private lastInteractState = false;
     private lastDirection = 'down';
     private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
     private activeInteractables = new Set<any>();
     protected objectSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
+
+    protected setMovementLocked(locked: boolean) {
+        this.movementLocked = locked;
+        if (locked) {
+            this.player?.setVelocity(0, 0);
+        }
+    }
 
     init(data: { spawnLocation?: string; playerDirection?: string }) {
         this.registry.set('spawnLocation', data.spawnLocation || 'player');
@@ -96,6 +104,21 @@ export default abstract class BaseScene extends Phaser.Scene {
                 frameRate: 8,
                 repeat: -1
             });
+
+            // Optional intro/wave animation (hello spritesheet)
+            if (this.textures.exists('player_hello') && !this.anims.exists('hello_wave')) {
+                const helloAnim = (this.registry.get('playerHelloAnim') as { start: number; end: number; frameRate?: number } | undefined) ?? {
+                    start: 0,
+                    end: 1,
+                    frameRate: 6,
+                };
+                this.anims.create({
+                    key: 'hello_wave',
+                    frames: this.anims.generateFrameNumbers('player_hello', { start: helloAnim.start, end: helloAnim.end }),
+                    frameRate: helloAnim.frameRate ?? 6,
+                    repeat: -1,
+                });
+            }
         }
         
         const savedDirection = this.registry.get('playerDirection') || 'down';
@@ -190,6 +213,14 @@ export default abstract class BaseScene extends Phaser.Scene {
                     this.dialogueBox.hide();
                 }
             }
+            this.lastInteractState = mobileInput.interact;
+            return;
+        }
+
+        // Used for intro sequences (e.g., welcome dialog) to freeze gameplay.
+        if (this.movementLocked) {
+            this.player.setVelocity(0, 0);
+            this.player.setDepth(this.player.y);
             this.lastInteractState = mobileInput.interact;
             return;
         }

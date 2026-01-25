@@ -5,6 +5,14 @@ export interface PlayerConfig {
     walkPath: string;
     frameWidth: number;
     frameHeight: number;
+    helloPath?: string;
+    helloFrameWidth?: number;
+    helloFrameHeight?: number;
+    helloAnim?: {
+        start: number;
+        end: number;
+        frameRate?: number;
+    };
 }
 
 export interface TilesetConfig {
@@ -30,6 +38,16 @@ export class TiledMapLoader {
             frameWidth: config.frameWidth, 
             frameHeight: config.frameHeight 
         });
+
+        if (config.helloPath) {
+            scene.load.spritesheet('player_hello', config.helloPath, {
+                frameWidth: config.helloFrameWidth ?? config.frameWidth,
+                frameHeight: config.helloFrameHeight ?? config.frameHeight,
+            });
+
+            // BaseScene will read this to build the looping intro animation.
+            scene.registry.set('playerHelloAnim', config.helloAnim ?? { start: 0, end: 1, frameRate: 6 });
+        }
     }
 
     static loadMap(scene: Phaser.Scene, config: MapConfig) {

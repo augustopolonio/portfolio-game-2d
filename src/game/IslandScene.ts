@@ -68,13 +68,26 @@ export default class IslandScene extends BaseScene {
 
         // Show welcome message on first game load
         if (!this.registry.get('hasWelcomeShown')) {
+            // Freeze gameplay + play intro wave until the welcome dialog closes.
+            this.setMovementLocked(true);
+            if (this.anims.exists('hello_wave')) {
+                this.player.play('hello_wave', true);
+            }
+
             this.time.delayedCall(500, () => {
                 const isDesktop = this.game.device.os.desktop;
                 const instructions = isDesktop 
                     ? "Use the arrow keys to move (← ↑ → ↓) and press [E] to interact." 
                     : "Use the on-screen buttons to move and interact.";
 
-                this.showDialogue(`Hello, traveler! Welcome to my village. Here you can explore my creations and experiences.|||${instructions}`);
+                this.showDialogue({
+                    text: `Hello, traveler! Welcome to my village. Here you can explore my creations and experiences.|||${instructions}`,
+                    onClose: () => {
+                        this.setMovementLocked(false);
+                        const facing = this.registry.get('playerDirection') || 'down';
+                        this.player.play(`idle_${facing}`, true);
+                    },
+                });
             });
             this.registry.set('hasWelcomeShown', true);
         }
