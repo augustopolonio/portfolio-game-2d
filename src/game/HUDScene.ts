@@ -16,7 +16,7 @@ export default class HUDScene extends Phaser.Scene {
             // Slot 0: top-right
             // Slot 1: same row, to the left
             const slotBlue = { x: this.scale.width - 40, y: 40 };
-            const slotGreen = { x: this.scale.width - 75, y: 40 };
+            const slotGreen = { x: this.scale.width - 85, y: 40 };
 
             this.registry.set('hudKeySlots', {
                 blue: slotBlue,

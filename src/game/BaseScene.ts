@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import DialogueBox, { type DialogueOptions } from './DialogueBox';
 
 export const GAME_CONFIG = {
-    PLAYER_SPEED: 190,
+    PLAYER_SPEED: 90,
     CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
     DEBUG_PHYSICS: false,
