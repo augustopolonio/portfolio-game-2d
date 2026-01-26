@@ -24,7 +24,7 @@ export default class HUDScene extends Phaser.Scene {
         // without worrying about event listener lifecycles
         const inventory = this.registry.get('inventory') || [];
 
-        if (inventory.includes('blue_key')) {
+        if (inventory.includes('blue_key') || inventory.includes('green_key')) {
              if (!this.keyIcon.visible) {
                  this.keyIcon.setVisible(true);
              }

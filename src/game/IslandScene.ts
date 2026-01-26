@@ -116,6 +116,8 @@ export default class IslandScene extends BaseScene {
             
             if (goToMap === 'dungeon') {
                 this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
+            } else if (goToMap === 'projects_castle') {
+                this.transitionToScene('ProjectsCastleScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'projects_closed_chest') {
             const closedChest = this.objectSprites.get('projects_closed_chest');
