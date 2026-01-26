@@ -220,7 +220,7 @@
                          "gid":316,
                          "height":24,
                          "id":42,
-                         "name":"dungeon_info",
+                         "name":"village_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -256,7 +256,7 @@
                          "gid":296,
                          "height":24,
                          "id":116,
-                         "name":"",
+                         "name":"experience_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -616,7 +616,7 @@
                          "gid":296,
                          "height":24,
                          "id":165,
-                         "name":"",
+                         "name":"under_construction_home_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -628,7 +628,7 @@
                          "gid":316,
                          "height":24,
                          "id":166,
-                         "name":"",
+                         "name":"village_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -640,7 +640,7 @@
                          "gid":296,
                          "height":24,
                          "id":167,
-                         "name":"",
+                         "name":"projects_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -652,7 +652,7 @@
                          "gid":296,
                          "height":24,
                          "id":168,
-                         "name":"",
+                         "name":"under_construction_info",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -688,7 +688,7 @@
                          "gid":274,
                          "height":24,
                          "id":195,
-                         "name":"closed_chest",
+                         "name":"projects_closed_chest",
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -700,7 +700,7 @@
                          "gid":277,
                          "height":24,
                          "id":196,
-                         "name":"open_chest",
+                         "name":"projects_open_chest",
                          "rotation":0,
                          "type":"",
                          "visible":false,
@@ -1705,7 +1705,7 @@
                         {
                          "height":17.3636363636364,
                          "id":22,
-                         "name":"dungeon_info",
+                         "name":"village_info",
                          "properties":[
                                 {
                                  "name":"text",
@@ -1722,7 +1722,7 @@
                         {
                          "height":17.3636,
                          "id":177,
-                         "name":"under_construction_info",
+                         "name":"under_construction_home_info",
                          "properties":[
                                 {
                                  "name":"text",
@@ -1788,7 +1788,7 @@
                         {
                          "height":29.0985181818182,
                          "id":197,
-                         "name":"projects_chest",
+                         "name":"projects_closed_chest",
                          "properties":[
                                 {
                                  "name":"key_word",
@@ -1815,7 +1815,7 @@
                         {
                          "height":17.3636,
                          "id":200,
-                         "name":"under_construction_info",
+                         "name":"projects_info",
                          "properties":[
                                 {
                                  "name":"key_word",

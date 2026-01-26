@@ -57,7 +57,7 @@ export default class DungeonScene extends BaseScene {
             topLayer?.setDepth(map.heightInPixels + 1000); // Ensure it's above everything
         }
         
-        this.objectSprites.get('open_chest')?.setVisible(false);
+        this.objectSprites.get('projects_open_chest')?.setVisible(false);
         
         this.setupColliders(map); // 'System/Colliders'
         this.setupInteractables(map); // 'System/Interactables'
@@ -83,8 +83,8 @@ export default class DungeonScene extends BaseScene {
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'chest') {
-            const closedChest = this.objectSprites.get('closed_chest');
-            const openChest = this.objectSprites.get('open_chest');
+            const closedChest = this.objectSprites.get('projects_closed_chest');
+            const openChest = this.objectSprites.get('projects_open_chest');
             
             if (closedChest?.visible) {
                 closedChest.setVisible(false);
@@ -105,7 +105,7 @@ export default class DungeonScene extends BaseScene {
     
     protected onInteractableEnter(obj: any) {
         if (obj.name === 'chest') {
-            const sprite = this.objectSprites.get('closed_chest');
+            const sprite = this.objectSprites.get('projects_closed_chest');
             if (sprite) {
                 OutlineEffect.apply(sprite);
             }
@@ -114,7 +114,7 @@ export default class DungeonScene extends BaseScene {
     
     protected onInteractableExit(obj: any) {
         if (obj.name === 'chest') {
-            const sprite = this.objectSprites.get('closed_chest');
+            const sprite = this.objectSprites.get('projects_closed_chest');
             if (sprite) {
                 OutlineEffect.remove(sprite);
             }
