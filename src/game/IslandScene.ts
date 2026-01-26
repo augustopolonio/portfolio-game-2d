@@ -81,7 +81,7 @@ export default class IslandScene extends BaseScene {
                     : "Use the on-screen buttons to move and interact.";
 
                 this.showDialogue({
-                    text: `Hello, traveler! Welcome to my village. Here you can explore my creations and experiences.|||${instructions}`,
+                    text: `Hello, traveler! My name is Augusto.|||Welcome to my village — here you can explore my creations and experiences.|||${instructions}`,
                     onClose: () => {
                         this.setMovementLocked(false);
                         const facing = this.registry.get('playerDirection') || 'down';
