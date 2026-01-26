@@ -142,15 +142,7 @@ export default class IslandScene extends BaseScene {
                     });
                     
                     onCloseCallback = () => {
-                        // Target position calculation considering camera zoom and scroll
-                        // The HUD icon is at (Width - 40, 40) in screen coordinates
-                        const camera = this.cameras.main;
-                        const zoom = camera.zoom;
-                        
-                        // Map screen coordinate to world coordinate
-                        // Use worldView.right/top for safer bounds calculation
-                        const targetX = camera.worldView.right - (50 / zoom);
-                        const targetY = camera.worldView.top + (50 / zoom);
+                        const { x: targetX, y: targetY } = this.getHudKeySlotWorldPosition('blue');
                         
                         this.tweens.add({
                             targets: keySprite,

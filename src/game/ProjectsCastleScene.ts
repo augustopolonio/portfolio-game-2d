@@ -97,7 +97,7 @@ export default class ProjectsCastleScene extends BaseScene {
                     openChest.x + openChest.width / 2,
                     openChest.y - openChest.height / 2,
                     'decor_sheet',
-                    42
+                    82
                 );
                 keySprite.setOrigin(0.5, 0.5);
                 keySprite.setDepth(openChest.depth + 1);
@@ -110,10 +110,7 @@ export default class ProjectsCastleScene extends BaseScene {
                 });
 
                 onCloseCallback = () => {
-                    const camera = this.cameras.main;
-                    const zoom = camera.zoom;
-                    const targetX = camera.worldView.right - (50 / zoom);
-                    const targetY = camera.worldView.top + (50 / zoom);
+                    const { x: targetX, y: targetY } = this.getHudKeySlotWorldPosition('green');
 
                     this.tweens.add({
                         targets: keySprite,

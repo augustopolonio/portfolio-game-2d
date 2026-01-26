@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import DialogueBox, { type DialogueOptions } from './DialogueBox';
 
 export const GAME_CONFIG = {
-    PLAYER_SPEED: 90,
+    PLAYER_SPEED: 190,
     CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
     DEBUG_PHYSICS: false,
@@ -26,6 +26,26 @@ export default abstract class BaseScene extends Phaser.Scene {
         if (locked) {
             this.player?.setVelocity(0, 0);
         }
+    }
+
+    protected getHudKeySlotWorldPosition(slot: 'blue' | 'green'): { x: number; y: number } {
+        const camera = this.cameras.main;
+        const zoom = camera.zoom || 1;
+
+        const slots = this.registry.get('hudKeySlots') as
+            | { blue?: { x: number; y: number }; green?: { x: number; y: number } }
+            | undefined;
+
+        const fallbackScreen = slot === 'blue'
+            ? { x: this.scale.width - 40, y: 40 }
+            : { x: this.scale.width - 75, y: 40 };
+
+        const screen = slots?.[slot] ?? fallbackScreen;
+
+        return {
+            x: camera.worldView.x + screen.x / zoom,
+            y: camera.worldView.y + screen.y / zoom,
+        };
     }
 
     init(data: { spawnLocation?: string; playerDirection?: string }) {
