@@ -3,6 +3,7 @@ import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
 import InfoPanel from './InfoPanel';
+import { Analytics } from '../utils/analytics';
 
 export default class ExperienceCastleScene extends BaseScene {
     private infoPanel!: InfoPanel;
@@ -83,6 +84,7 @@ export default class ExperienceCastleScene extends BaseScene {
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
 
             if (goToMap === 'island') {
+                Analytics.trackSceneChange('IslandScene', 'ExperienceCastleScene');
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'chest') {
@@ -90,6 +92,7 @@ export default class ExperienceCastleScene extends BaseScene {
             const openChest = this.objectSprites.get('projects_open_chest');
 
             if (closedChest?.visible) {
+                Analytics.trackChestOpened('chest', 'Experience Castle');
                 closedChest.setVisible(false);
                 openChest?.setVisible(true);
                 this.showDialogue(
@@ -98,6 +101,17 @@ export default class ExperienceCastleScene extends BaseScene {
             } else {
                 this.showDialogue('Chest already open');
             }
+        } else if (obj.name === 'experience_closed_chest') {
+            const closedChest = this.objectSprites.get('experience_closed_chest');
+            const openChest = this.objectSprites.get('experience_open_chest');
+
+            if (!closedChest?.visible) {
+                return;
+            }
+
+            Analytics.trackChestOpened('experience_chest', 'Experience Castle');
+            closedChest.setVisible(false);
+            openChest?.setVisible(true);
         }
 
         // Check for objects with 'id' property (projects/experiences)
@@ -107,6 +121,8 @@ export default class ExperienceCastleScene extends BaseScene {
             if (type === 'game') {
                 this.infoPanel.showGame(id);
             } else if (type === 'experience') {
+                // Track experience view - we'll pass a generic label since we don't have company name here
+                Analytics.trackExperienceViewed(id, `Experience ${id}`);
                 this.infoPanel.showExperience(id);
             }
             return;

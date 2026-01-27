@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Analytics } from '../utils/analytics';
 
 interface ExperienceData {
     company: string;
@@ -308,6 +309,7 @@ export default class InfoPanel {
         // Play Game button (if link available)
         if (game.link && !game.link.includes('/unreleased-projects')) {
             const playBtn = this.createButton('Play Game', () => {
+                Analytics.trackExternalLinkClick(game.link, game.title);
                 window.open(game.link, '_blank');
             });
             playBtn.setPosition(-110, 0);

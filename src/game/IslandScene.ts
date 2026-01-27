@@ -2,6 +2,7 @@ import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
+import { Analytics } from '../utils/analytics';
 
 export default class IslandScene extends BaseScene {
     private mapConfig: MapConfig = {
@@ -68,6 +69,9 @@ export default class IslandScene extends BaseScene {
 
         // Show welcome message on first game load
         if (!this.registry.get('hasWelcomeShown')) {
+            // Track game start
+            Analytics.trackGameStart();
+            
             // Freeze gameplay + play intro wave until the welcome dialog closes.
             this.setMovementLocked(true);
             if (this.anims.exists('hello_wave')) {
@@ -115,8 +119,10 @@ export default class IslandScene extends BaseScene {
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
             
             if (goToMap === 'experience_castle') {
+                Analytics.trackCastleEntered('Experience Castle');
                 this.transitionToScene('ExperienceCastleScene', { spawnLocation: goToDoor });
             } else if (goToMap === 'projects_castle') {
+                Analytics.trackCastleEntered('Projects Castle');
                 this.transitionToScene('ProjectsCastleScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'projects_closed_chest') {
@@ -124,6 +130,7 @@ export default class IslandScene extends BaseScene {
             const openChest = this.objectSprites.get('projects_open_chest');
             
             if (closedChest?.visible) {
+                Analytics.trackChestOpened('projects_chest', 'Island');
                 closedChest.setVisible(false);
                 openChest?.setVisible(true);
 
@@ -157,6 +164,7 @@ export default class IslandScene extends BaseScene {
                                 // Update inventory
                                 const currentInventory = this.registry.get('inventory') || [];
                                 if (!currentInventory.includes('blue_key')) {
+                                    Analytics.trackKeyCollected('blue');
                                     this.registry.set('inventory', [...currentInventory, 'blue_key']);
                                 }
                             }

@@ -3,6 +3,7 @@ import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
 import InfoPanel from './InfoPanel';
+import { Analytics } from '../utils/analytics';
 
 export default class ProjectsCastleScene extends BaseScene {
     private infoPanel!: InfoPanel;
@@ -79,8 +80,10 @@ export default class ProjectsCastleScene extends BaseScene {
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
 
             if (goToMap === 'island') {
+                Analytics.trackSceneChange('IslandScene', 'ProjectsCastleScene');
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
             } else if (goToMap === 'experience_castle') {
+                Analytics.trackSceneChange('ExperienceCastleScene', 'ProjectsCastleScene');
                 this.transitionToScene('ExperienceCastleScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'experience_closed_chest') {
@@ -91,6 +94,7 @@ export default class ProjectsCastleScene extends BaseScene {
                 return;
             }
 
+            Analytics.trackChestOpened('experience_chest', 'Projects Castle');
             closedChest.setVisible(false);
             openChest?.setVisible(true);
 
@@ -127,6 +131,7 @@ export default class ProjectsCastleScene extends BaseScene {
                             keySprite.destroy();
                             const currentInventory = this.registry.get('inventory') || [];
                             if (!currentInventory.includes('green_key')) {
+                                Analytics.trackKeyCollected('green');
                                 this.registry.set('inventory', [...currentInventory, 'green_key']);
                             }
                         },
@@ -140,8 +145,10 @@ export default class ProjectsCastleScene extends BaseScene {
         if (id > -1) {
             const type = obj.properties?.find((p: any) => p.name === 'type')?.value;
             if (type === 'game') {
+                Analytics.trackProjectViewed(id, `Project ${id}`);
                 this.infoPanel.showGame(id);
             } else if (type === 'experience') {
+                Analytics.trackExperienceViewed(id, `Experience ${id}`);
                 this.infoPanel.showExperience(id);
             }
             return;
