@@ -101,13 +101,13 @@ export default class ExperienceCastleScene extends BaseScene {
         }
 
         // Check for objects with 'id' property (projects/experiences)
-        const index = obj.properties?.find((p: any) => p.name === 'id')?.value;
-        if (index) {
+        const id = obj.properties?.find((p: any) => p.name === 'id')?.value;
+        if (id > -1) {
             const type = obj.properties?.find((p: any) => p.name === 'type')?.value;
             if (type === 'game') {
-                this.infoPanel.showGame(index);
+                this.infoPanel.showGame(id);
             } else if (type === 'experience') {
-                this.infoPanel.showExperience(index);
+                this.infoPanel.showExperience(id);
             }
             return;
         }
