@@ -97,6 +97,14 @@ export default class ExperienceCastleScene extends BaseScene {
             }
         }
 
+        // Check for objects with 'id' property (projects/experiences)
+        const id = obj.properties?.find((p: any) => p.name === 'id')?.value;
+        if (id) {
+            // For now, show the object name. Later, fetch JSON data using the id.
+            this.showDialogue(`Interacting with: ${obj.name}\n(ID: ${id})`);
+            return;
+        }
+
         const text = obj.properties?.find((p: any) => p.name === 'text')?.value;
         if (text) {
             const keyWord = obj.properties?.find((p: any) => p.name === 'key_word')?.value;
