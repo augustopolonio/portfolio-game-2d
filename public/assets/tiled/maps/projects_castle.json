@@ -602,7 +602,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":1
+                                 "value":0
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",
@@ -619,7 +624,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":2
+                                 "value":1
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",
@@ -636,7 +646,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":3
+                                 "value":2
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",
@@ -653,7 +668,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":4
+                                 "value":3
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",
@@ -670,7 +690,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":5
+                                 "value":4
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",
@@ -687,7 +712,12 @@
                                 {
                                  "name":"id",
                                  "type":"int",
-                                 "value":6
+                                 "value":5
+                                }, 
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"game"
                                 }],
                          "rotation":0,
                          "type":"info",

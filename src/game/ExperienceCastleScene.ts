@@ -2,8 +2,10 @@ import BaseScene from './BaseScene';
 import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
+import InfoPanel from './InfoPanel';
 
 export default class ExperienceCastleScene extends BaseScene {
+    private infoPanel!: InfoPanel;
     private mapConfig: MapConfig = {
         tilesetFolder: 'P_P_FREE_RPG_TILESET',
         tilesets: [
@@ -28,6 +30,7 @@ export default class ExperienceCastleScene extends BaseScene {
 
     create() {
         this.scene.launch('HUDScene');
+        this.infoPanel = new InfoPanel(this);
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 
@@ -98,10 +101,14 @@ export default class ExperienceCastleScene extends BaseScene {
         }
 
         // Check for objects with 'id' property (projects/experiences)
-        const id = obj.properties?.find((p: any) => p.name === 'id')?.value;
-        if (id) {
-            // For now, show the object name. Later, fetch JSON data using the id.
-            this.showDialogue(`Interacting with: ${obj.name}\n(ID: ${id})`);
+        const index = obj.properties?.find((p: any) => p.name === 'id')?.value;
+        if (index) {
+            const type = obj.properties?.find((p: any) => p.name === 'type')?.value;
+            if (type === 'game') {
+                this.infoPanel.showGame(index);
+            } else if (type === 'experience') {
+                this.infoPanel.showExperience(index);
+            }
             return;
         }
 
