@@ -77,8 +77,8 @@ export default class ProjectsCastleScene extends BaseScene {
 
             if (goToMap === 'island') {
                 this.transitionToScene('IslandScene', { spawnLocation: goToDoor });
-            } else if (goToMap === 'dungeon') {
-                this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
+            } else if (goToMap === 'experience_castle') {
+                this.transitionToScene('ExperienceCastleScene', { spawnLocation: goToDoor });
             }
         } else if (obj.name === 'experience_closed_chest') {
             const closedChest = this.objectSprites.get('experience_closed_chest');
@@ -159,3 +159,4 @@ export default class ProjectsCastleScene extends BaseScene {
         }
     }
 }
+

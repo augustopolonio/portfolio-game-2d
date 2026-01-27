@@ -1756,17 +1756,17 @@
                         {
                          "height":46.75,
                          "id":193,
-                         "name":"dungeon_door_entry",
+                      "name":"experience_castle_door_entry",
                          "properties":[
                                 {
                                  "name":"go_to_door",
                                  "type":"string",
-                                 "value":"dungeon_door_exit"
+                             "value":"experience_castle_door_exit"
                                 }, 
                                 {
                                  "name":"go_to_map",
                                  "type":"string",
-                                 "value":"dungeon"
+                             "value":"experience_castle"
                                 }, 
                                 {
                                  "name":"key_color",
@@ -1880,13 +1880,13 @@
                         {
                          "height":0,
                          "id":30,
-                         "name":"dungeon_door_entry",
+                      "name":"experience_castle_door_entry",
                          "point":true,
                          "properties":[
                                 {
                                  "name":"location",
                                  "type":"string",
-                                 "value":"dungeon_door_entry"
+                             "value":"experience_castle_door_entry"
                                 }],
                          "rotation":0,
                          "type":"",

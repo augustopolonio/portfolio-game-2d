@@ -114,8 +114,8 @@ export default class IslandScene extends BaseScene {
             const goToMap = obj.properties?.find((p: any) => p.name === 'go_to_map')?.value;
             const goToDoor = obj.properties?.find((p: any) => p.name === 'go_to_door')?.value;
             
-            if (goToMap === 'dungeon') {
-                this.transitionToScene('DungeonScene', { spawnLocation: goToDoor });
+            if (goToMap === 'experience_castle') {
+                this.transitionToScene('ExperienceCastleScene', { spawnLocation: goToDoor });
             } else if (goToMap === 'projects_castle') {
                 this.transitionToScene('ProjectsCastleScene', { spawnLocation: goToDoor });
             }
@@ -194,3 +194,4 @@ export default class IslandScene extends BaseScene {
         }
     }
 }
+

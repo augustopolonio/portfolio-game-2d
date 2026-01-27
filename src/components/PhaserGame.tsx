@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import Phaser from 'phaser';
 import BBCodeTextPlugin from 'phaser3-rex-plugins/plugins/bbcodetext-plugin.js';
-import DungeonScene from '../game/DungeonScene';
 import IslandScene from '../game/IslandScene';
 import HUDScene from '../game/HUDScene';
 import ProjectsCastleScene from '../game/ProjectsCastleScene';
+import ExperienceCastleScene from '../game/ExperienceCastleScene';
 import MobileControls from './MobileControls';
 import './PhaserGame.css';
 
@@ -37,7 +37,7 @@ const PhaserGame = () => {
                     start: true
                 }]
             },
-            scene: [IslandScene, DungeonScene, ProjectsCastleScene, HUDScene],
+            scene: [IslandScene, ExperienceCastleScene, ProjectsCastleScene, HUDScene],
             physics: {
                 default: 'arcade',
                 arcade: {
