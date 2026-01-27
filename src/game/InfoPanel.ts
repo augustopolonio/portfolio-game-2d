@@ -30,14 +30,14 @@ export default class InfoPanel {
     private buttons: Array<{ container: Phaser.GameObjects.Container; action: () => void }> = [];
     private focusedButtonIndex = 0;
     private keyboardListener?: (event: KeyboardEvent) => void;
+    private scrollY = 0;
+    private maxScrollY = 0;
+    private panelWidth = 700;
+    private panelHeight = 500;
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         
-        // Define panel size at zoom level 1 (will be scaled by camera zoom)
-        const panelWidth = 700;
-        const panelHeight = 500;
-
         // Create main container - will be positioned and scaled based on camera
         this.container = this.scene.add.container(0, 0);
         this.container.setScrollFactor(0);
@@ -53,12 +53,12 @@ export default class InfoPanel {
         this.container.add(overlay);
 
         // Panel background
-        this.background = this.scene.add.rectangle(0, 0, panelWidth, panelHeight, 0x000000, 0.6);
+        this.background = this.scene.add.rectangle(0, 0, this.panelWidth, this.panelHeight, 0x000000, 0.6);
         this.background.setStrokeStyle(3, 0x6e84e7);
         this.container.add(this.background);
 
         // Content container (will hold scrollable content)
-        this.content = this.scene.add.container(0, 0);
+        this.content = this.scene.add.container(0, -this.panelHeight / 2 + 20);
         this.container.add(this.content);
 
         // Setup keyboard navigation
@@ -75,13 +75,31 @@ export default class InfoPanel {
             } else if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
                 this.moveFocus(-1);
                 event.preventDefault();
-            } else if (event.key === 'e' || event.key === 'E' || event.key === 'Enter') {
+            } else if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') {
+                this.scroll(-30);
+                event.preventDefault();
+            } else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') {
+                this.scroll(30);
+                event.preventDefault();
+            } else if (event.key === 'Enter') {
                 this.activateButton();
                 event.preventDefault();
             }
         };
 
         window.addEventListener('keydown', this.keyboardListener);
+    }
+
+    private scroll(amount: number) {
+        this.scrollY += amount;
+        this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
+        this.updateContentPosition();
+    }
+
+    private updateContentPosition() {
+        // Content starts at top of panel with some padding
+        const baseY = -this.panelHeight / 2 + 20;
+        this.content.setY(baseY - this.scrollY);
     }
 
     private moveFocus(direction: number) {
@@ -175,9 +193,7 @@ export default class InfoPanel {
     private renderGameContent(game: GameData) {
         this.content.removeAll(true);
 
-        const panelWidth = this.background.width;
-        const panelHeight = this.background.height;
-        let yOffset = -panelHeight / 2 + 25;
+        let yOffset = 0;
 
         // Status and Engine badges at top
         const statusColor = game.status === 'released' ? '#4ade80' : '#fbbf24';
@@ -188,7 +204,7 @@ export default class InfoPanel {
         const engineBadge = this.createBadge(game.engine.toUpperCase(), '#3b82f6', 60);
         badgeContainer.add([statusBadge, engineBadge]);
         this.content.add(badgeContainer);
-        yOffset += 40;
+        yOffset += 35;
 
         // Title above image
         const title = this.scene.add.text(0, yOffset, game.title, {
@@ -196,11 +212,11 @@ export default class InfoPanel {
             color: '#ffffff',
             fontStyle: 'bold',
             align: 'center',
-            wordWrap: { width: panelWidth - 60 },
+            wordWrap: { width: this.panelWidth - 60 },
         });
         title.setOrigin(0.5, 0);
         this.content.add(title);
-        yOffset += title.height + 100; // Increased margin
+        yOffset += title.height + 50; // Increased margin
 
         // Game image - load dynamically
         const imageKey = `game_image_${game.id}`;
@@ -210,22 +226,22 @@ export default class InfoPanel {
         if (!this.scene.textures.exists(imageKey)) {
             this.scene.load.image(imageKey, imageUrl);
             this.scene.load.once('complete', () => {
-                this.addGameImage(imageKey, yOffset, panelWidth, panelHeight, game);
+                this.addGameImage(imageKey, yOffset, game);
             });
             this.scene.load.start();
         } else {
-            this.addGameImage(imageKey, yOffset, panelWidth, panelHeight, game);
+            this.addGameImage(imageKey, yOffset, game);
         }
     }
 
-    private addGameImage(imageKey: string, startYOffset: number, panelWidth: number, panelHeight: number, game: GameData) {
+    private addGameImage(imageKey: string, startYOffset: number, game: GameData) {
         // Remove loading placeholder if exists
         const existingImage = this.content.getAll().find((obj: any) => obj.name === 'game_image_container');
         if (existingImage) {
             existingImage.destroy();
         }
 
-        let yOffset = startYOffset;
+        let yOffset = startYOffset + 50;
         const imageContainer = this.scene.add.container(0, yOffset);
         imageContainer.name = 'game_image_container';
 
@@ -256,7 +272,7 @@ export default class InfoPanel {
             fontSize: '14px',
             color: '#cccccc',
             align: 'center',
-            wordWrap: { width: panelWidth - 100 },
+            wordWrap: { width: this.panelWidth - 100 },
             lineSpacing: 5,
         });
         description.setOrigin(0.5, 0);
@@ -278,7 +294,7 @@ export default class InfoPanel {
                 fontSize: '14px',
                 color: '#aaaaaa',
                 align: 'center',
-                wordWrap: { width: panelWidth - 100 },
+                wordWrap: { width: this.panelWidth - 100 },
             });
             tagsText.setOrigin(0.5, 0);
             this.content.add(tagsText);
@@ -322,9 +338,7 @@ export default class InfoPanel {
     private renderExperienceContent(experience: ExperienceData) {
         this.content.removeAll(true);
 
-        const panelWidth = this.background.width;
-        const panelHeight = this.background.height;
-        let yOffset = -panelHeight / 2 + 60;
+        let yOffset = 0;
 
         // Company & Title
         const company = this.scene.add.text(0, yOffset, experience.company, {
@@ -342,7 +356,7 @@ export default class InfoPanel {
             fontSize: '18px',
             color: '#60a5fa',
             align: 'center',
-            wordWrap: { width: panelWidth - 100 },
+            wordWrap: { width: this.panelWidth - 100 },
         });
         jobTitle.setOrigin(0.5, 0);
         this.content.add(jobTitle);
@@ -368,7 +382,7 @@ export default class InfoPanel {
             fontSize: '14px',
             color: '#cccccc',
             align: 'center',
-            wordWrap: { width: panelWidth - 100 },
+            wordWrap: { width: this.panelWidth - 100 },
             lineSpacing: 5,
         });
         description.setOrigin(0.5, 0);
@@ -388,13 +402,13 @@ export default class InfoPanel {
 
             experience.highlights.forEach((highlight) => {
                 const bulletPoint = this.scene.add.text(
-                    -(panelWidth / 2 - 80),
+                    -(this.panelWidth / 2 - 80),
                     yOffset,
                     `• ${highlight}`,
                     {
                         fontSize: '12px',
                         color: '#aaaaaa',
-                        wordWrap: { width: panelWidth - 140 },
+                        wordWrap: { width: this.panelWidth - 140 },
                         lineSpacing: 3,
                     }
                 );
@@ -419,9 +433,9 @@ export default class InfoPanel {
 
             // Create technology badges
             const techContainer = this.scene.add.container(0, yOffset);
-            let xPos = -(panelWidth / 2 - 80);
+            let xPos = -(this.panelWidth / 2 - 80);
             let yPos = 0;
-            const maxWidth = panelWidth - 160;
+            const maxWidth = this.panelWidth - 160;
             let currentRowWidth = 0;
 
             experience.technologies.forEach((tech, index) => {
@@ -429,7 +443,7 @@ export default class InfoPanel {
                 const badgeWidth = (tech.length * 8) + 20; // Approximate width
 
                 if (currentRowWidth + badgeWidth > maxWidth && index > 0) {
-                    xPos = -(panelWidth / 2 - 80);
+                    xPos = -(this.panelWidth / 2 - 80);
                     yPos += 35;
                     currentRowWidth = 0;
                 }
@@ -532,6 +546,12 @@ export default class InfoPanel {
         this.container.setScale(1 / zoom);
         this.container.setPosition(gameWidth / 2, gameHeight / 2);
         
+        // Calculate max scroll based on content height
+        const contentBounds = this.getContentBounds();
+        this.maxScrollY = Math.max(0, contentBounds.height - (this.panelHeight - 80));
+        this.scrollY = 0;
+        this.updateContentPosition();
+        
         this.container.setVisible(true);
         this.scene.input.keyboard?.enabled && this.scene.input.keyboard.resetKeys();
         
@@ -540,6 +560,22 @@ export default class InfoPanel {
         if (baseScene.setMovementLocked) {
             baseScene.setMovementLocked(true);
         }
+    }
+
+    private getContentBounds(): { height: number } {
+        let minY = 0;
+        let maxY = 0;
+        
+        this.content.iterate((child: any) => {
+            if (child.y !== undefined) {
+                const childTop = child.y - (child.height || 0) * (child.originY || 0);
+                const childBottom = child.y + (child.height || 0) * (1 - (child.originY || 0));
+                minY = Math.min(minY, childTop);
+                maxY = Math.max(maxY, childBottom);
+            }
+        });
+        
+        return { height: maxY - minY };
     }
 
     close() {
