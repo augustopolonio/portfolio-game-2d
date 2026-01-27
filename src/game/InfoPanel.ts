@@ -429,7 +429,7 @@ export default class InfoPanel {
             });
             techTitle.setOrigin(0.5, 0);
             this.content.add(techTitle);
-            yOffset += techTitle.height + 15;
+            yOffset += techTitle.height + 35;
 
             // Create technology badges
             const techContainer = this.scene.add.container(0, yOffset);
@@ -456,12 +456,21 @@ export default class InfoPanel {
             });
 
             this.content.add(techContainer);
+            
+            // Calculate total height of tech badges container
+            let maxYPos = 0;
+            techContainer.iterate((child: any) => {
+                if (child.y !== undefined) {
+                    maxYPos = Math.max(maxYPos, child.y);
+                }
+            });
+            yOffset += maxYPos + 35 + 20; // tech badge height + spacing
         }
 
-        // Close button
+        // Close button - positioned after all content
         this.buttons = [];
         const closeBtn = this.createButton('Close', () => this.close());
-        closeBtn.setPosition(0, yOffset + 40);
+        closeBtn.setPosition(0, yOffset);
         this.content.add(closeBtn);
         
         // Set initial focus
