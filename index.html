@@ -13,7 +13,14 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-0QPLXP2RJC');
+      
+      // Configure for iframe embedding
+      gtag('config', 'G-0QPLXP2RJC', {
+        'cookie_flags': 'SameSite=None;Secure',
+        'linker': {
+          'domains': ['augustopolonio.vercel.app', 'augustopolonio.github.io']
+        }
+      });
     </script>
     
     <title>portfolio-game-2d</title>
