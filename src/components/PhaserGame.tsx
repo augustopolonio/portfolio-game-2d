@@ -30,6 +30,9 @@ const PhaserGame = () => {
             parent: gameContainer.current,
             pixelArt: true,
             roundPixels: true,
+            loader: {
+                baseURL: import.meta.env.BASE_URL,
+            },
             plugins: {
                 global: [{
                     key: 'rexBBCodeTextPlugin',
