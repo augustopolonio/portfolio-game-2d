@@ -30,6 +30,7 @@ export default class ProjectsCastleScene extends BaseScene {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
         this.load.audio('projects_music', 'assets/audio/music/Bright_Roads_of_Doria.ogg');
+        this.load.audio('chest_open', 'assets/audio/sfx/success_key_founded.ogg');
     }
 
     create() {
@@ -108,7 +109,7 @@ export default class ProjectsCastleScene extends BaseScene {
                 return;
             }
 
-            Analytics.trackChestOpened('experience_chest', 'Projects Castle');
+            Analytics.trackChestOpened('experience_chest', 'Projects Castle');            
             closedChest.setVisible(false);
             openChest?.setVisible(true);
 
@@ -122,6 +123,8 @@ export default class ProjectsCastleScene extends BaseScene {
                 );
                 keySprite.setOrigin(0.5, 0.5);
                 keySprite.setDepth(openChest.depth + 1);
+
+                this.sound.play('chest_open', { volume: 0.5 });
 
                 this.tweens.add({
                     targets: keySprite,

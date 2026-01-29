@@ -29,6 +29,7 @@ export default class IslandScene extends BaseScene {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
         this.load.audio('island_music', 'assets/audio/music/Cozy_Kingdom_Overworld.ogg');
+        this.load.audio('chest_open', 'assets/audio/sfx/success_key_founded.ogg');
     }
 
     create() {
@@ -162,6 +163,9 @@ export default class IslandScene extends BaseScene {
                     const keySprite = this.add.sprite(openChest.x + openChest.width / 2, openChest.y - openChest.height / 2, 'decor_sheet', 42);
                     keySprite.setOrigin(0.5, 0.5);
                     keySprite.setDepth(openChest.depth + 1);
+
+                    //Play sfx
+                    this.sound.play('chest_open', { volume: 0.5 });
 
                     this.tweens.add({
                         targets: keySprite,
