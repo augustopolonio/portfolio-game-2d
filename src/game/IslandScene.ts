@@ -30,6 +30,7 @@ export default class IslandScene extends BaseScene {
         TiledMapLoader.loadMap(this, this.mapConfig);
         this.load.audio('island_music', 'assets/audio/music/Cozy_Kingdom_Overworld.ogg');
         this.load.audio('chest_open', 'assets/audio/sfx/success_key_founded.ogg');
+        this.load.audio('birds_ambient', 'assets/audio/sfx/birds.ogg');
     }
 
     create() {
@@ -40,6 +41,9 @@ export default class IslandScene extends BaseScene {
         
         // Start or resume background music with fade-in
         this.startOrResumeMusic('island_music', 0.5);
+        
+        // Play birds ambient sound in loop
+        this.sound.play('birds_ambient', { loop: true, volume: 0.5 });
         
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
