@@ -29,11 +29,16 @@ export default class ProjectsCastleScene extends BaseScene {
     preload() {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
+        this.load.audio('projects_music', 'assets/audio/music/Bright_Roads_of_Doria.ogg');
     }
 
     create() {
         this.scene.launch('HUDScene');
         this.infoPanel = new InfoPanel(this);
+        
+        // Start or resume background music with fade-in
+        this.startOrResumeMusic('projects_music', 0.5);
+        
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 

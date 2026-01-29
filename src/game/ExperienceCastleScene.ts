@@ -27,11 +27,16 @@ export default class ExperienceCastleScene extends BaseScene {
     preload() {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
+        this.load.audio('experience_music', 'assets/audio/music/Maple_Mosaic.ogg');
     }
 
     create() {
         this.scene.launch('HUDScene');
         this.infoPanel = new InfoPanel(this);
+        
+        // Start or resume background music with fade-in
+        this.startOrResumeMusic('experience_music', 0.5);
+        
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 

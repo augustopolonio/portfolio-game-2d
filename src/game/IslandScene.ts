@@ -28,10 +28,15 @@ export default class IslandScene extends BaseScene {
     preload() {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
+        this.load.audio('island_music', 'assets/audio/music/Cozy_Kingdom_Overworld.ogg');
     }
 
     create() {
         this.scene.launch('HUDScene');
+        
+        // Start or resume background music with fade-in
+        this.startOrResumeMusic('island_music', 0.5);
+        
         OutlineEffect.addToScene(this);
         const { map, tilesets } = TiledMapLoader.createMap(this, this.mapConfig);
 

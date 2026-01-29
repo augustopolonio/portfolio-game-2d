@@ -20,6 +20,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
     private activeInteractables = new Set<any>();
     protected objectSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
+    protected music?: Phaser.Sound.BaseSound;
 
     protected setMovementLocked(locked: boolean) {
         this.movementLocked = locked;
@@ -328,8 +329,70 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.player.setVelocity(0, 0);
     }
 
+    protected startOrResumeMusic(musicKey: string, targetVolume: number = 0.5) {
+        const currentSceneName = this.scene.key;
+        const savedSeek = this.registry.get(`music_${currentSceneName}_seek`);
+        
+        // Stop all currently playing sounds to prevent overlap
+        this.sound.stopAll();
+        
+        // Check if this music already exists in the sound manager
+        const existingMusic = this.sound.get(musicKey);
+        
+        if (existingMusic) {
+            this.music = existingMusic;
+        } else {
+            // Create new music only if it doesn't exist
+            this.music = this.sound.add(musicKey, { loop: true, volume: 0 });
+        }
+        
+        // If music is already playing (shouldn't happen after stopAll, but just in case)
+        if (this.music.isPlaying) {
+            return;
+        }
+        
+        // Start playing the music
+        this.music.play();
+        
+        // Set the seek position if we have a saved one
+        if (savedSeek !== undefined && savedSeek > 0) {
+            const webAudioSound = this.music as Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound;
+            if (webAudioSound.seek !== undefined) {
+                webAudioSound.seek = savedSeek;
+            }
+        }
+        
+        // Fade in from volume 0 to target volume
+        (this.music as any).volume = 0;
+        this.tweens.add({
+            targets: this.music,
+            volume: targetVolume,
+            duration: 1000, // 1 second fade-in
+        });
+    }
+
     protected transitionToScene(sceneName: string, data?: any) {
         this.cameras.main.fadeOut(GAME_CONFIG.TRANSITION_DURATION);
+        
+        // Fade out and stop the music, saving its position
+        if (this.music && this.music.isPlaying) {
+            const currentSceneName = this.scene.key;
+            const currentSeek = (this.music as Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound).seek;
+            
+            // Save the current position immediately
+            this.registry.set(`music_${currentSceneName}_seek`, currentSeek);
+            
+            this.tweens.add({
+                targets: this.music,
+                volume: 0,
+                duration: GAME_CONFIG.TRANSITION_DURATION,
+                onComplete: () => {
+                    // Stop instead of pause to clean up properly
+                    this.music?.stop();
+                }
+            });
+        }
+        
         this.cameras.main.once('camerafadeoutcomplete', () => {
             this.scene.start(sceneName, { ...data, playerDirection: this.lastDirection });
         });
