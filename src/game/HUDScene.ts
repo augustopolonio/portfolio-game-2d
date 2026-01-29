@@ -100,23 +100,25 @@ export default class HUDScene extends Phaser.Scene {
         this.environmentNameText.setVisible(true);
         this.environmentNameText.setAlpha(0);
 
-        // Fade in
-        this.tweens.add({
-            targets: this.environmentNameText,
-            alpha: 1,
-            duration: 500,
-            ease: 'Power2',
-            onComplete: () => {
-                // Wait, then fade out
-                this.time.delayedCall(duration, () => {
-                    this.tweens.add({
-                        targets: this.environmentNameText,
-                        alpha: 0,
-                        duration: 500,
-                        ease: 'Power2'
+        // Wait 1 second, then fade in
+        this.time.delayedCall(500, () => {
+            this.tweens.add({
+                targets: this.environmentNameText,
+                alpha: 1,
+                duration: 500,
+                ease: 'Power2',
+                onComplete: () => {
+                    // Wait, then fade out
+                    this.time.delayedCall(duration, () => {
+                        this.tweens.add({
+                            targets: this.environmentNameText,
+                            alpha: 0,
+                            duration: 500,
+                            ease: 'Power2'
+                        });
                     });
-                });
-            }
+                }
+            });
         });
     }
 }
