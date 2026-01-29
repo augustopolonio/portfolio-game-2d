@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 export default class HUDScene extends Phaser.Scene {
     private blueKeyIcon!: Phaser.GameObjects.Sprite;
     private greenKeyIcon!: Phaser.GameObjects.Sprite;
+    private environmentNameText!: Phaser.GameObjects.Text;
     private readonly iconScale = 2;
     private readonly iconAngleDeg = -35;
 
@@ -43,6 +44,31 @@ export default class HUDScene extends Phaser.Scene {
         this.greenKeyIcon.setScrollFactor(0);
         this.greenKeyIcon.setVisible(false);
 
+        // Environment name text (top center)
+        this.environmentNameText = this.add.text(
+            this.scale.width / 2,
+            40,
+            '',
+            {
+                fontSize: '32px',
+                color: '#ffffff',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 4,
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000000',
+                    blur: 4,
+                    fill: true
+                }
+            }
+        );
+        this.environmentNameText.setOrigin(0.5);
+        this.environmentNameText.setScrollFactor(0);
+        this.environmentNameText.setDepth(1000);
+        this.environmentNameText.setAlpha(0);
+
         updateLayout();
         this.scale.on('resize', updateLayout);
     }
@@ -57,5 +83,40 @@ export default class HUDScene extends Phaser.Scene {
 
         this.blueKeyIcon.setVisible(hasBlue);
         this.greenKeyIcon.setVisible(hasGreen);
+    }
+
+    /**
+     * Display environment name with fade in/out effect
+     * @param name - The name to display (e.g., "Home Island", "Projects Castle")
+     * @param duration - How long to display in milliseconds (default 3000ms)
+     */
+    showEnvironmentName(name: string, duration: number = 3000) {
+        // Cancel any existing tweens on the text
+        this.tweens.killTweensOf(this.environmentNameText);
+        
+        // Update position in case screen size changed
+        this.environmentNameText.setPosition(this.scale.width / 2, 40);
+        this.environmentNameText.setText(name);
+        this.environmentNameText.setVisible(true);
+        this.environmentNameText.setAlpha(0);
+
+        // Fade in
+        this.tweens.add({
+            targets: this.environmentNameText,
+            alpha: 1,
+            duration: 500,
+            ease: 'Power2',
+            onComplete: () => {
+                // Wait, then fade out
+                this.time.delayedCall(duration, () => {
+                    this.tweens.add({
+                        targets: this.environmentNameText,
+                        alpha: 0,
+                        duration: 500,
+                        ease: 'Power2'
+                    });
+                });
+            }
+        });
     }
 }

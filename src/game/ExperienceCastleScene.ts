@@ -31,7 +31,10 @@ export default class ExperienceCastleScene extends BaseScene {
     }
 
     create() {
-        this.scene.launch('HUDScene');
+        // Launch HUDScene if not already running
+        if (!this.scene.isActive('HUDScene')) {
+            this.scene.launch('HUDScene');
+        }
         this.infoPanel = new InfoPanel(this);
         
         // Start or resume background music with fade-in
@@ -72,6 +75,12 @@ export default class ExperienceCastleScene extends BaseScene {
         this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
+        
+        // Show environment name
+        const hudScene = this.scene.get('HUDScene') as any;
+        if (hudScene && hudScene.showEnvironmentName) {
+            hudScene.showEnvironmentName('Experience Castle');
+        }
 
         // Test for BBCode Text
         this.input.keyboard?.on('keydown-T', () => {

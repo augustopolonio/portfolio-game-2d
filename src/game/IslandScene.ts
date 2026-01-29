@@ -32,7 +32,10 @@ export default class IslandScene extends BaseScene {
     }
 
     create() {
-        this.scene.launch('HUDScene');
+        // Launch HUDScene if not already running
+        if (!this.scene.isActive('HUDScene')) {
+            this.scene.launch('HUDScene');
+        }
         
         // Start or resume background music with fade-in
         this.startOrResumeMusic('island_music', 0.5);
@@ -71,6 +74,14 @@ export default class IslandScene extends BaseScene {
         this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
+        
+        // Show environment name when returning to island (if not first time)
+        if (this.registry.get('hasWelcomeShown')) {
+            const hudScene = this.scene.get('HUDScene') as any;
+            if (hudScene && hudScene.showEnvironmentName) {
+                hudScene.showEnvironmentName('Home Island');
+            }
+        }
 
         // Show welcome message on first game load
         if (!this.registry.get('hasWelcomeShown')) {
@@ -95,6 +106,12 @@ export default class IslandScene extends BaseScene {
                         this.setMovementLocked(false);
                         const facing = this.registry.get('playerDirection') || 'down';
                         this.player.play(`idle_${facing}`, true);
+                        
+                        // Show environment name after intro
+                        const hudScene = this.scene.get('HUDScene') as any;
+                        if (hudScene && hudScene.showEnvironmentName) {
+                            hudScene.showEnvironmentName('Home Island');
+                        }
                     },
                 });
             });

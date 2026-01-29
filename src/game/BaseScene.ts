@@ -394,6 +394,8 @@ export default abstract class BaseScene extends Phaser.Scene {
         }
         
         this.cameras.main.once('camerafadeoutcomplete', () => {
+            // Stop current scene but keep HUDScene running
+            this.scene.stop();
             this.scene.start(sceneName, { ...data, playerDirection: this.lastDirection });
         });
     }
