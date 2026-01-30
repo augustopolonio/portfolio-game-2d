@@ -645,7 +645,7 @@
                          "type":"",
                          "visible":true,
                          "width":24,
-                         "x":508.5,
+                         "x":526.5,
                          "y":679
                         }, 
                         {
@@ -1645,8 +1645,8 @@
                          "type":"",
                          "visible":true,
                          "width":16.6363454545454,
-                         "x":511.075766666667,
-                         "y":661.357946969697
+                         "x":529.700766666667,
+                         "y":660.232946969697
                         }, 
                         {
                          "height":19.0416454545453,
@@ -1756,17 +1756,17 @@
                         {
                          "height":46.75,
                          "id":193,
-                      "name":"experience_castle_door_entry",
+                         "name":"experience_castle_door_entry",
                          "properties":[
                                 {
                                  "name":"go_to_door",
                                  "type":"string",
-                             "value":"experience_castle_door_exit"
+                                 "value":"experience_castle_door_exit"
                                 }, 
                                 {
                                  "name":"go_to_map",
                                  "type":"string",
-                             "value":"experience_castle"
+                                 "value":"experience_castle"
                                 }, 
                                 {
                                  "name":"key_color",
@@ -1836,8 +1836,8 @@
                          "type":"info",
                          "visible":true,
                          "width":16.6420000000001,
-                         "x":511.14775,
-                         "y":671.2217
+                         "x":529.77275,
+                         "y":670.0967
                         }, 
                         {
                          "height":17.3636,
@@ -1880,13 +1880,13 @@
                         {
                          "height":0,
                          "id":30,
-                      "name":"experience_castle_door_entry",
+                         "name":"experience_castle_door_entry",
                          "point":true,
                          "properties":[
                                 {
                                  "name":"location",
                                  "type":"string",
-                             "value":"experience_castle_door_entry"
+                                 "value":"experience_castle_door_entry"
                                 }],
                          "rotation":0,
                          "type":"",

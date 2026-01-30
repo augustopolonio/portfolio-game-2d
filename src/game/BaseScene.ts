@@ -14,6 +14,8 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected eKey!: Phaser.Input.Keyboard.Key;
     protected currentInteractable: any = null;
     protected dialogueBox!: DialogueBox;
+    protected interactionIndicator!: Phaser.GameObjects.Image;
+    protected indicatorFloatOffset = { y: 0 };
     protected movementLocked = false;
     private lastInteractState = false;
     private lastDirection = 'down';
@@ -222,6 +224,24 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as any;
         this.eKey = this.input.keyboard!.addKey('E');
         this.dialogueBox = new DialogueBox(this);
+        
+        // Create interaction indicator sprite
+        const isMobile = !this.game.device.os.desktop;
+        const indicatorKey = isMobile ? 'a_button' : 'e_key_button';
+        this.interactionIndicator = this.add.image(0, 0, indicatorKey);
+        this.interactionIndicator.setScale(0.8);
+        this.interactionIndicator.setVisible(false);
+        this.interactionIndicator.setDepth(10000); // Always on top
+        
+        // Add floating animation
+        this.tweens.add({
+            targets: this.indicatorFloatOffset,
+            y: -8,
+            duration: 600,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
     }
 
     update() {
@@ -279,6 +299,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
         this.player.setVelocity(velocityX, velocityY);
         
+        // Update interaction indicator position above player with floating animation
+        if (this.interactionIndicator && this.interactionIndicator.visible) {
+            this.interactionIndicator.setPosition(this.player.x, this.player.y - 40 + this.indicatorFloatOffset.y);
+        }
+        
         // Update animation
         if (isMoving) {
             this.player.play(`walk_${this.lastDirection}`, true);
@@ -288,6 +313,7 @@ export default abstract class BaseScene extends Phaser.Scene {
         
         if (Phaser.Input.Keyboard.JustDown(this.eKey) || (mobileInput.interact && !this.lastInteractState)) {
             if (this.currentInteractable) {
+                this.interactionIndicator.setVisible(false);
                 this.handleInteraction(this.currentInteractable);
             }
         }
@@ -309,6 +335,7 @@ export default abstract class BaseScene extends Phaser.Scene {
                 if (!this.activeInteractables.has(obj)) {
                     console.log('Enter:', obj.name);
                     this.activeInteractables.add(obj);
+                    this.interactionIndicator.setVisible(true);
                     this.onInteractableEnter(obj);
                 }
             }
@@ -319,6 +346,7 @@ export default abstract class BaseScene extends Phaser.Scene {
             if (!currentlyTouching.has(_obj)) {
                 console.log('Exit:', _obj.name);
                 this.activeInteractables.delete(_obj);
+                this.interactionIndicator.setVisible(false);
                 this.onInteractableExit(_obj);
             }
         });
