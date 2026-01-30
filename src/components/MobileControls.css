@@ -30,8 +30,8 @@
 .interact-button {
     width: 80px;
     height: 80px;
-    background: rgba(0, 255, 0, 0.6);
-    border: 3px solid rgba(255, 255, 255, 0.4);
+    background: rgb(182 213 60);
+    border: 7px solid rgb(97 101 83);
     border-radius: 50%;
     color: white;
     font-size: 32px;
@@ -42,8 +42,10 @@
     justify-content: center;
     cursor: pointer;
     user-select: none;
+    font-family: 'Press Start 2P', cursive;
+    padding-left: 3px;
 }
 
 .interact-button:active {
-    background: rgba(0, 255, 0, 0.8);
+    background: rgba(255, 255, 255, 0.5);
 }

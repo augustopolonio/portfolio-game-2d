@@ -79,7 +79,7 @@ const MobileControls = ({ onMove, onInteract }: MobileControlsProps) => {
                 className="interact-button" 
                 onTouchStart={() => onInteract()}
             >
-                E
+                A
             </button>
         </div>
     );
