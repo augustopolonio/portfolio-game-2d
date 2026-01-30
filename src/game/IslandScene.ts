@@ -31,6 +31,10 @@ export default class IslandScene extends BaseScene {
         this.load.audio('island_music', 'assets/audio/music/Cozy_Kingdom_Overworld.ogg');
         this.load.audio('chest_open', 'assets/audio/sfx/success_key_founded.ogg');
         this.load.audio('birds_ambient', 'assets/audio/sfx/birds.ogg');
+        
+        // Load dialogue button textures
+        this.load.image('e_key_button', 'assets/textures/e_key.png');
+        this.load.image('a_button', 'assets/textures/a_button.png');
     }
 
     create() {

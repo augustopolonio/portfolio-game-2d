@@ -31,6 +31,10 @@ export default class ProjectsCastleScene extends BaseScene {
         TiledMapLoader.loadMap(this, this.mapConfig);
         this.load.audio('projects_music', 'assets/audio/music/Bright_Roads_of_Doria.ogg');
         this.load.audio('chest_open', 'assets/audio/sfx/success_key_founded.ogg');
+        
+        // Load dialogue button textures
+        this.load.image('e_key_button', 'assets/textures/e_key.png');
+        this.load.image('a_button', 'assets/textures/a_button.png');
     }
 
     create() {

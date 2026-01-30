@@ -28,6 +28,10 @@ export default class ExperienceCastleScene extends BaseScene {
         TiledMapLoader.loadPlayer(this, PLAYER_CONFIG);
         TiledMapLoader.loadMap(this, this.mapConfig);
         this.load.audio('experience_music', 'assets/audio/music/Maple_Mosaic.ogg');
+        
+        // Load dialogue button textures
+        this.load.image('e_key_button', 'assets/textures/e_key.png');
+        this.load.image('a_button', 'assets/textures/a_button.png');
     }
 
     create() {

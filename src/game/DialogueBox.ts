@@ -12,6 +12,7 @@ export default class DialogueBox {
     private container!: Phaser.GameObjects.Container;
     private background!: Phaser.GameObjects.Rectangle;
     private text!: any; // BBCodeText instance
+    private buttonSprite!: Phaser.GameObjects.Image;
     private isVisible = false;
     private pages: string[] = [];
     private currentPage = 0;
@@ -66,8 +67,27 @@ export default class DialogueBox {
         
         this.text.setOrigin(0.5);
         
+        // Create button sprite (will choose correct texture when showing)
+        const isMobile = !this.scene.game.device.os.desktop;
+        const buttonKey = isMobile ? 'a_button' : 'e_key_button';
+        this.buttonSprite = this.scene.add.image(0, 0, buttonKey);
+        this.buttonSprite.setOrigin(1, 1); // Bottom right origin
+        this.buttonSprite.setPosition(width / 2 - 10, height / 2 - 10); // Bottom right corner with padding
+        this.buttonSprite.setScale(2); // Scale down the button
+        this.buttonSprite.setVisible(false);
+        
+        // Add pulsing animation to button
+        this.scene.tweens.add({
+            targets: this.buttonSprite,
+            scale: 2.2,
+            duration: 500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        
         this.container = this.scene.add.container(0, 0);
-        this.container.add([this.background, this.text]);
+        this.container.add([this.background, this.text, this.buttonSprite]);
         this.container.setScrollFactor(0);
         this.container.setDepth(3000); // Always on top of everything (UI layer)
         this.container.setVisible(false);
@@ -139,6 +159,7 @@ export default class DialogueBox {
         this.isTyping = true;
         this.charIndex = 0;
         this.text.setText('');
+        this.buttonSprite.setVisible(false); // Hide button while typing
 
         this.visibleIndexToFormattedIndex = [];
         for (let i = 0; i < this.fullText.length; i++) {
@@ -177,11 +198,13 @@ export default class DialogueBox {
         this.isTyping = false;
         this.typewriterEvent?.destroy(); // Ensure timer is stopped
         this.text.setText(this.fullText);
+        this.buttonSprite.setVisible(true); // Show button when text is complete
     }
 
     private skipTypewriter() {
         if (this.isTyping) {
             this.finishTyping();
+            this.buttonSprite.setVisible(true); // Ensure button is visible after skip
         }
     }
 
@@ -256,6 +279,7 @@ export default class DialogueBox {
 
     hide() {
         this.typewriterEvent?.destroy();
+        this.buttonSprite.setVisible(false);
         this.container.setVisible(false);
         this.isVisible = false;
         this.isTyping = false;
