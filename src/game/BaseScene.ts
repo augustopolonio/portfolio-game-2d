@@ -15,7 +15,6 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected currentInteractable: any = null;
     protected dialogueBox!: DialogueBox;
     protected interactionIndicator!: Phaser.GameObjects.Image;
-    protected indicatorFloatOffset = { y: 0 };
     protected movementLocked = false;
     private lastInteractState = false;
     private lastDirection = 'down';
@@ -233,11 +232,11 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.interactionIndicator.setVisible(false);
         this.interactionIndicator.setDepth(10000); // Always on top
         
-        // Add floating animation
+        // Add pulsing animation to button
         this.tweens.add({
-            targets: this.indicatorFloatOffset,
-            y: -8,
-            duration: 600,
+            targets: this.interactionIndicator,
+            scale: 0.9,
+            duration: 500,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
@@ -299,11 +298,6 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.player.setDepth(this.player.y);
         this.player.setVelocity(velocityX, velocityY);
         
-        // Update interaction indicator position above player with floating animation
-        if (this.interactionIndicator && this.interactionIndicator.visible) {
-            this.interactionIndicator.setPosition(this.player.x, this.player.y - 40 + this.indicatorFloatOffset.y);
-        }
-        
         // Update animation
         if (isMoving) {
             this.player.play(`walk_${this.lastDirection}`, true);
@@ -335,6 +329,8 @@ export default abstract class BaseScene extends Phaser.Scene {
                 if (!this.activeInteractables.has(obj)) {
                     console.log('Enter:', obj.name);
                     this.activeInteractables.add(obj);
+                    // Position indicator above the interactable object
+                    this.interactionIndicator.setPosition(obj.x! + obj.width! / 2, obj.y! - 20);
                     this.interactionIndicator.setVisible(true);
                     this.onInteractableEnter(obj);
                 }

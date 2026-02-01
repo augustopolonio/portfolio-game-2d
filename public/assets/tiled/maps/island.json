@@ -1671,7 +1671,7 @@
                  "name":"Interactables",
                  "objects":[
                         {
-                         "height":46.75,
+                         "height":29.75,
                          "id":21,
                          "name":"projects_door_entry",
                          "properties":[
@@ -1700,7 +1700,7 @@
                          "visible":true,
                          "width":43.5,
                          "x":458.075757575758,
-                         "y":633.060606060606
+                         "y":650.060606060606
                         }, 
                         {
                          "height":17.3636363636364,
@@ -1754,7 +1754,7 @@
                          "y":670.875018181818
                         }, 
                         {
-                         "height":46.75,
+                         "height":27.7500000000001,
                          "id":193,
                          "name":"experience_castle_door_entry",
                          "properties":[
@@ -1783,10 +1783,10 @@
                          "visible":true,
                          "width":43.5,
                          "x":770.583333333333,
-                         "y":511.958333333333
+                         "y":530.958333333333
                         }, 
                         {
-                         "height":29.0985181818182,
+                         "height":18.8257909090909,
                          "id":197,
                          "name":"projects_closed_chest",
                          "properties":[
@@ -1810,7 +1810,7 @@
                          "visible":true,
                          "width":20.2727272727273,
                          "x":193.272727272727,
-                         "y":917.723468181818
+                         "y":927.996195454545
                         }, 
                         {
                          "height":17.3636,
