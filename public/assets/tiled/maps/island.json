@@ -1710,7 +1710,7 @@
                                 {
                                  "name":"text",
                                  "type":"string",
-                                 "value":"Follow this path to explore the castle."
+                                 "value":"Follow this path to explore the castles."
                                 }],
                          "rotation":0,
                          "type":"info",
