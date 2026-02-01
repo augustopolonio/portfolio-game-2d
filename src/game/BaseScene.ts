@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import DialogueBox, { type DialogueOptions } from './DialogueBox';
 
 export const GAME_CONFIG = {
-    PLAYER_SPEED: 90,
+    PLAYER_SPEED: 590,
     CAMERA_ZOOM: 3,
     TRANSITION_DURATION: 500,
     DEBUG_PHYSICS: false,
@@ -16,6 +16,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected dialogueBox!: DialogueBox;
     protected interactionIndicator!: Phaser.GameObjects.Image;
     protected movementLocked = false;
+    protected uiCamera?: Phaser.Cameras.Scene2D.Camera;
     private lastInteractState = false;
     private lastDirection = 'down';
     private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
@@ -222,6 +223,11 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected setupInput() {
         this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as any;
         this.eKey = this.input.keyboard!.addKey('E');
+
+        // Create a dedicated UI camera so screen-space UI is not affected by the world camera zoom.
+        // Important: call this BEFORE creating UI objects (DialogueBox, InfoPanel, etc.).
+        this.ensureUICamera();
+
         this.dialogueBox = new DialogueBox(this);
         
         // Create interaction indicator sprite
@@ -231,6 +237,9 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.interactionIndicator.setScale(0.8);
         this.interactionIndicator.setVisible(false);
         this.interactionIndicator.setDepth(10000); // Always on top
+
+        // This indicator is a world-space object (it follows map coordinates), so keep it OUT of the UI camera.
+        this.uiCamera?.ignore(this.interactionIndicator);
         
         // Add pulsing animation to button
         this.tweens.add({
@@ -241,6 +250,40 @@ export default abstract class BaseScene extends Phaser.Scene {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+    }
+
+    protected ensureUICamera() {
+        if (this.uiCamera) return;
+
+        // Main camera exists by default. Add a second camera on top for UI.
+        this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+        this.uiCamera.setZoom(1);
+        this.uiCamera.setScroll(0, 0);
+        this.uiCamera.roundPixels = true;
+
+        // Ignore everything currently in the scene (world) so the UI camera will only render objects created later
+        // OR objects explicitly registered via registerUIObject().
+        this.uiCamera.ignore(this.children.list);
+
+        // Keep the UI camera sized correctly.
+        this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
+            this.uiCamera?.setSize(gameSize.width, gameSize.height);
+        });
+    }
+
+    /**
+     * Register an object as screen-space UI: render it on the UI camera and ignore it on the world camera.
+     */
+    public registerUIObject(obj: Phaser.GameObjects.GameObject | Phaser.GameObjects.GameObject[]) {
+        // The UI camera is created during setupInput(), but allow late registration.
+        // Do NOT create it too early (before world objects), or it will end up rendering the world.
+        if (!this.uiCamera) {
+            return;
+        }
+
+        this.cameras.main.ignore(obj as any);
+        // In case it was part of the world list that got ignored when the UI camera was created.
+        (this.uiCamera as any).removeIgnore?.(obj as any);
     }
 
     update() {

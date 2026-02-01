@@ -91,6 +91,12 @@ export default class DialogueBox {
         this.container.setScrollFactor(0);
         this.container.setDepth(3000); // Always on top of everything (UI layer)
         this.container.setVisible(false);
+
+        // Render via UI camera (if available) so it isn't affected by world camera zoom.
+        const baseScene = this.scene as any;
+        if (baseScene.registerUIObject) {
+            baseScene.registerUIObject(this.container);
+        }
     }
 
     private paginateText(message: string): string[] {
@@ -216,15 +222,15 @@ export default class DialogueBox {
         
         this.onClose = onClose;
 
-        const gameWidth = this.scene.game.scale.width;
-        const gameHeight = this.scene.game.scale.height;
-        // Use a default zoom if camera not ready or simple calculation
-        const camera = this.scene.cameras.main;
-        const zoom = camera ? camera.zoom : 1;
-        
-        this.container.setScale(1 / zoom);
-        // Position at bottom center, respecting zoom
-        this.container.setPosition(gameWidth / 2, gameHeight - 560 / zoom);
+        const gameWidth = this.scene.scale.width;
+        const gameHeight = this.scene.scale.height;
+
+        // UI camera uses zoom=1, so keep the dialogue at a fixed screen-space size and position.
+        // Place at bottom-center with a comfortable margin.
+        const boxHeight = 100;
+        const marginBottom = 20;
+        this.container.setScale(1);
+        this.container.setPosition(gameWidth / 2, gameHeight - boxHeight / 2 - marginBottom);
         
         // Prepare text with replacements
         let processedText = text;

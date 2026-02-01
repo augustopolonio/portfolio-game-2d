@@ -50,6 +50,12 @@ export default class InfoPanel {
         this.container.setDepth(15000); // Above HUD
         this.container.setVisible(false);
 
+        // Render via UI camera (if available) so it isn't affected by world camera zoom.
+        const baseScene = this.scene as any;
+        if (baseScene.registerUIObject) {
+            baseScene.registerUIObject(this.container);
+        }
+
         // Background overlay (full screen)
         const gameWidth = this.scene.scale.width;
         const gameHeight = this.scene.scale.height;
@@ -651,11 +657,9 @@ export default class InfoPanel {
     show() {
         const gameWidth = this.scene.scale.width;
         const gameHeight = this.scene.scale.height;
-        const camera = this.scene.cameras.main;
-        const zoom = camera ? camera.zoom : 1;
-        
-        // Scale and position to account for camera zoom
-        this.container.setScale(1 / zoom);
+
+        // UI camera uses zoom=1, so keep it in screen-space coordinates.
+        this.container.setScale(1);
         this.container.setPosition(gameWidth / 2, gameHeight / 2);
         
         // Calculate max scroll based on content height

@@ -42,7 +42,6 @@ export default class ProjectsCastleScene extends BaseScene {
         if (!this.scene.isActive('HUDScene')) {
             this.scene.launch('HUDScene');
         }
-        this.infoPanel = new InfoPanel(this);
         
         // Start or resume background music with fade-in
         this.startOrResumeMusic('projects_music', 0.5);
@@ -83,6 +82,9 @@ export default class ProjectsCastleScene extends BaseScene {
         this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
+
+        // Create the InfoPanel after setupInput() so it gets registered on the UI camera.
+        this.infoPanel = new InfoPanel(this);
         
         // Show environment name
         const hudScene = this.scene.get('HUDScene') as any;
