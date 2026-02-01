@@ -31,6 +31,11 @@ export default class InfoPanel {
     private buttons: Array<{ container: Phaser.GameObjects.Container; action: () => void }> = [];
     private focusedButtonIndex = 0;
     private keyboardListener?: (event: KeyboardEvent) => void;
+    private updateListener?: (time: number, delta: number) => void;
+    private lastMobileAxisX = 0;
+    private lastMobileInteractState = false;
+    private nextFocusMoveAt = 0;
+    private pendingUnlock = false;
     private scrollY = 0;
     private maxScrollY = 0;
     private panelWidth = 700;
@@ -91,6 +96,75 @@ export default class InfoPanel {
         window.addEventListener('keydown', this.keyboardListener);
     }
 
+    private ensureUpdateListener() {
+        if (this.updateListener) return;
+
+        this.updateListener = (_time: number, delta: number) => {
+            const mobileInput = (this.scene.registry.get('mobileInput') as any) || { x: 0, y: 0, interact: false };
+            const axisX = typeof mobileInput.x === 'number' ? mobileInput.x : 0;
+            const axisY = typeof mobileInput.y === 'number' ? mobileInput.y : 0;
+            const interact = !!mobileInput.interact;
+
+            // If we just closed the panel via the mobile interact button,
+            // keep movement locked until the interact is released.
+            if (this.pendingUnlock) {
+                if (!interact) {
+                    this.pendingUnlock = false;
+                    const baseScene = this.scene as any;
+                    if (baseScene.setMovementLocked) {
+                        baseScene.setMovementLocked(false);
+                    }
+
+                    // If panel is hidden, we can stop polling.
+                    if (!this.container.visible) {
+                        this.removeUpdateListener();
+                    }
+                }
+
+                this.lastMobileAxisX = axisX;
+                this.lastMobileInteractState = interact;
+                return;
+            }
+
+            if (!this.container.visible) return;
+
+            // Joystick X: discrete focus navigation
+            const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+            const xDeadZone = 0.65;
+            if (now >= this.nextFocusMoveAt) {
+                if (axisX > xDeadZone && this.lastMobileAxisX <= xDeadZone) {
+                    this.moveFocus(1);
+                    this.nextFocusMoveAt = now + 180;
+                } else if (axisX < -xDeadZone && this.lastMobileAxisX >= -xDeadZone) {
+                    this.moveFocus(-1);
+                    this.nextFocusMoveAt = now + 180;
+                }
+            }
+            this.lastMobileAxisX = axisX;
+
+            // Joystick Y: continuous scroll (positive => down)
+            const yDeadZone = 0.35;
+            if (Math.abs(axisY) > yDeadZone) {
+                const scrollSpeed = 0.35; // px/ms at full tilt
+                this.scroll(axisY * scrollSpeed * delta);
+            }
+
+            // Mobile "A" button: activate focused button
+            if (interact && !this.lastMobileInteractState) {
+                this.activateButton();
+            }
+            this.lastMobileInteractState = interact;
+        };
+
+        this.scene.events.on('update', this.updateListener);
+    }
+
+    private removeUpdateListener() {
+        if (!this.updateListener) return;
+        this.scene.events.off('update', this.updateListener);
+        this.updateListener = undefined;
+    }
+
     private scroll(amount: number) {
         this.scrollY += amount;
         this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
@@ -113,6 +187,16 @@ export default class InfoPanel {
         this.focusedButtonIndex = (this.focusedButtonIndex + direction + this.buttons.length) % this.buttons.length;
 
         // Add highlight to new button
+        this.updateButtonHighlight(this.focusedButtonIndex, true);
+    }
+
+    private setFocus(index: number) {
+        if (this.buttons.length === 0) return;
+        if (index < 0 || index >= this.buttons.length) return;
+        if (index === this.focusedButtonIndex) return;
+
+        this.updateButtonHighlight(this.focusedButtonIndex, false);
+        this.focusedButtonIndex = index;
         this.updateButtonHighlight(this.focusedButtonIndex, true);
     }
 
@@ -530,7 +614,24 @@ export default class InfoPanel {
         container.add([bg, label]);
 
         // Track button for navigation
+        const buttonIndex = this.buttons.length;
         this.buttons.push({ container, action });
+
+        const activate = () => {
+            if (!this.container.visible) return;
+            this.setFocus(buttonIndex);
+            action();
+        };
+
+        // Pointer/touch support (mouse + mobile)
+        bg.setInteractive({ useHandCursor: true });
+        bg.on('pointerover', () => this.setFocus(buttonIndex));
+        bg.on('pointerdown', activate);
+
+        // Make the text clickable too (helps on small screens)
+        label.setInteractive({ useHandCursor: true });
+        label.on('pointerover', () => this.setFocus(buttonIndex));
+        label.on('pointerdown', activate);
 
         return container;
     }
@@ -565,6 +666,16 @@ export default class InfoPanel {
         
         this.container.setVisible(true);
         this.scene.input.keyboard?.enabled && this.scene.input.keyboard.resetKeys();
+
+        // Enable polling of mobileInput (virtual joystick + A button)
+        const mobileInput = (this.scene.registry.get('mobileInput') as any) || { x: 0, y: 0, interact: false };
+        this.lastMobileAxisX = typeof mobileInput.x === 'number' ? mobileInput.x : 0;
+        // Important: if the panel was opened via the same interact button (A/E),
+        // don't immediately treat that already-held press as a click.
+        this.lastMobileInteractState = !!mobileInput.interact;
+        this.nextFocusMoveAt = 0;
+        this.pendingUnlock = false;
+        this.ensureUpdateListener();
         
         // Block player movement (access through BaseScene)
         const baseScene = this.scene as any;
@@ -591,11 +702,24 @@ export default class InfoPanel {
 
     close() {
         this.container.setVisible(false);
-        
-        // Unlock player movement
+
+        // If close was triggered by the mobile interact button, the interact flag may still be true
+        // for a short time. Keep movement locked until the button is released.
+        const mobileInput = (this.scene.registry.get('mobileInput') as any) || { x: 0, y: 0, interact: false };
+        const isInteractStillPressed = !!mobileInput.interact;
         const baseScene = this.scene as any;
         if (baseScene.setMovementLocked) {
-            baseScene.setMovementLocked(false);
+            if (isInteractStillPressed) {
+                this.pendingUnlock = true;
+                this.ensureUpdateListener();
+            } else {
+                baseScene.setMovementLocked(false);
+                // Stop polling when hidden
+                this.removeUpdateListener();
+            }
+        } else {
+            // Stop polling when hidden
+            this.removeUpdateListener();
         }
         
         if (this.closeCallback) {
@@ -612,6 +736,7 @@ export default class InfoPanel {
         if (this.keyboardListener) {
             window.removeEventListener('keydown', this.keyboardListener);
         }
+        this.removeUpdateListener();
         this.container.destroy();
     }
 }
