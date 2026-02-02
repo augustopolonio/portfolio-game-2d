@@ -26,7 +26,7 @@ const PhaserGame = () => {
             type: Phaser.WEBGL,
             width: 800,
             height: 500,
-            backgroundColor: '#2d2d2d',
+            backgroundColor: '#000000',
             parent: gameContainer.current,
             pixelArt: true,
             roundPixels: true,
