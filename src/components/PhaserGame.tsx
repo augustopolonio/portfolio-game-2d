@@ -13,6 +13,7 @@ const PhaserGame = () => {
     const gameInstance = useRef<Phaser.Game | null>(null);
     const [mobileInput, setMobileInput] = useState({ x: 0, y: 0, interact: false });
     const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     const handleInteract = () => {
         setMobileInput(prev => ({ ...prev, interact: true }));
@@ -49,10 +50,10 @@ const PhaserGame = () => {
                 }
             },
             scale: {
-                 mode: Phaser.Scale.FIT,
-                // autoCenter: Phaser.Scale.CENTER_BOTH,
-                // width: 800,
-                // height: 500,
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 800,
+                height: 500,
             },
         };
 
@@ -60,12 +61,54 @@ const PhaserGame = () => {
         gameInstance.current = new Phaser.Game(config);
         gameInstance.current.registry.set('mobileInput', mobileInput);
 
+        // Keep Phaser's internal size in sync with the actual container size.
+        // On mobile (especially landscape), address bar / browser UI changes can desync the canvas.
+        const parentEl = gameContainer.current;
+        const game = gameInstance.current;
+        const applySize = () => {
+            if (!parentEl || !game) return;
+            const w = parentEl.clientWidth;
+            const h = parentEl.clientHeight;
+            if (w > 0 && h > 0) {
+                game.scale.resize(w, h);
+            }
+        };
+        applySize();
+
+        const resizeObserver = typeof ResizeObserver !== 'undefined'
+            ? new ResizeObserver(() => applySize())
+            : null;
+        resizeObserver?.observe(parentEl);
+
         // 4. Cleanup function (runs when component unmounts)
         return () => {
+            resizeObserver?.disconnect();
             if (gameInstance.current) {
                 gameInstance.current.destroy(true);
                 gameInstance.current = null;
             }
+        };
+    }, []);
+
+    useEffect(() => {
+        // Mobile browser UI (URL bar / nav bar) can change the visible viewport.
+        // Use VisualViewport when available to get the *real* visible height.
+        const updateAppHeight = () => {
+            const height = window.visualViewport?.height ?? window.innerHeight;
+            document.documentElement.style.setProperty('--app-height', `${height}px`);
+        };
+
+        updateAppHeight();
+        window.addEventListener('resize', updateAppHeight);
+        window.addEventListener('orientationchange', updateAppHeight);
+        window.visualViewport?.addEventListener('resize', updateAppHeight);
+        window.visualViewport?.addEventListener('scroll', updateAppHeight);
+
+        return () => {
+            window.removeEventListener('resize', updateAppHeight);
+            window.removeEventListener('orientationchange', updateAppHeight);
+            window.visualViewport?.removeEventListener('resize', updateAppHeight);
+            window.visualViewport?.removeEventListener('scroll', updateAppHeight);
         };
     }, []);
 
@@ -91,7 +134,7 @@ const PhaserGame = () => {
     }, [mobileInput]);
 
     return (
-        <div className={`phaser-game-wrapper ${isLandscape ? 'landscape' : 'portrait'}`}>
+        <div className={`phaser-game-wrapper ${isLandscape ? 'landscape' : 'portrait'} ${isMobile ? 'has-mobile-controls' : ''}`}>
             <div ref={gameContainer} className="phaser-game-container" />
             <MobileControls 
                 onMove={(direction) => setMobileInput(prev => ({ ...prev, x: direction.x, y: direction.y }))}

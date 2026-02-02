@@ -44,6 +44,20 @@ export default class InfoPanel {
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         
+        // Make panel responsive based on screen size
+        const isMobile = !this.scene.game.device.os.desktop;
+        const screenWidth = this.scene.scale.width;
+        const screenHeight = this.scene.scale.height;
+        
+        if (isMobile) {
+            // Narrower on mobile to avoid overlapping controls
+            this.panelWidth = Math.min(400, screenWidth * 0.85);
+            this.panelHeight = Math.min(450, screenHeight * 0.55);
+        } else {
+            this.panelWidth = Math.min(700, screenWidth * 0.9);
+            this.panelHeight = Math.min(500, screenHeight * 0.8);
+        }
+        
         // Create main container - will be positioned and scaled based on camera
         this.container = this.scene.add.container(0, 0);
         this.container.setScrollFactor(0);
@@ -657,10 +671,14 @@ export default class InfoPanel {
     show() {
         const gameWidth = this.scene.scale.width;
         const gameHeight = this.scene.scale.height;
+        const isMobile = !this.scene.game.device.os.desktop;
 
         // UI camera uses zoom=1, so keep it in screen-space coordinates.
         this.container.setScale(1);
-        this.container.setPosition(gameWidth / 2, gameHeight / 2);
+        
+        // Position higher on mobile to avoid controls at bottom
+        const yOffset = isMobile ? -50 : 0;
+        this.container.setPosition(gameWidth / 2, gameHeight / 2 + yOffset);
         
         // Calculate max scroll based on content height
         const contentBounds = this.getContentBounds();

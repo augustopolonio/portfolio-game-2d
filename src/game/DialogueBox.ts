@@ -22,15 +22,109 @@ export default class DialogueBox {
     private typewriterEvent?: Phaser.Time.TimerEvent;
     private visibleIndexToFormattedIndex: number[] = [];
     private onClose?: () => void;
+
+    private layoutWidth = 0;
+    private layoutHeight = 0;
     
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         this.create();
     }
 
+    private cssPixelsToGamePixels(cssPixels: number, gameHeight: number): number {
+        const canvas = this.scene.scale.canvas;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.height) return cssPixels;
+        return cssPixels * (gameHeight / rect.height);
+    }
+
+    private getBottomCoveredGamePixels(gameHeight: number): number {
+        // Mobile controls are DOM elements overlaying the canvas. Depending on layout/orientation,
+        // they may overlap the canvas by less than their CSS height. Compute the real overlap.
+        if (typeof document === 'undefined') return 0;
+
+        const controlsEl = document.querySelector('.mobile-controls') as HTMLElement | null;
+        if (!controlsEl) return 0;
+
+        const canvas = this.scene.scale.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
+        const controlsRect = controlsEl.getBoundingClientRect();
+
+        // Guard: on some browsers/layouts `controlsRect.top` can report unexpectedly,
+        // which would yield an overlap larger than the controls themselves and push the UI too high.
+        const rawOverlapCss = canvasRect.bottom - controlsRect.top;
+        const overlapCss = Phaser.Math.Clamp(rawOverlapCss, 0, controlsRect.height);
+        return this.cssPixelsToGamePixels(overlapCss, gameHeight);
+    }
+
+    private updateLayout() {
+        const isMobile = !this.scene.game.device.os.desktop;
+        const screenWidth = this.scene.scale.width;
+        const screenHeight = this.scene.scale.height;
+
+        const nextWidth = isMobile
+            ? Math.min(420, screenWidth * 0.88)
+            : Math.min(600, screenWidth * 0.9);
+
+        // Slightly shrink in very short viewports (common on landscape phones)
+        const baseHeight = isMobile ? 120 : 100;
+        const nextHeight = isMobile && screenHeight < 420 ? 100 : baseHeight;
+
+        const sizeChanged = nextWidth !== this.layoutWidth || nextHeight !== this.layoutHeight;
+        this.layoutWidth = nextWidth;
+        this.layoutHeight = nextHeight;
+
+        if (!this.background) return;
+
+        if (sizeChanged) {
+            this.background.setSize(this.layoutWidth, this.layoutHeight);
+            this.background.setDisplaySize(this.layoutWidth, this.layoutHeight);
+
+            // RexBBCodeText supports fixed size; Text fallback supports wordWrap width.
+            if (this.text?.setFixedSize) {
+                this.text.setFixedSize(this.layoutWidth - 20, this.layoutHeight - 20);
+            }
+            if (this.text?.setWordWrapWidth) {
+                this.text.setWordWrapWidth(this.layoutWidth - 20);
+            }
+
+            this.buttonSprite.setPosition(this.layoutWidth / 2 - 10, this.layoutHeight / 2 - 10);
+        }
+    }
+
+    private positionContainer() {
+        const gameWidth = this.scene.scale.width;
+        const gameHeight = this.scene.scale.height;
+        const isMobile = !this.scene.game.device.os.desktop;
+        const isLandscape = isMobile && gameWidth > gameHeight;
+
+        // Keep the dialogue at a fixed screen-space size and position (UI camera zoom=1).
+        const boxHeight = this.layoutHeight || (isMobile ? 120 : 100);
+
+        // Desktop: small bottom padding.
+        // Mobile portrait: place just above whatever portion of the canvas is actually covered by the DOM controls.
+        // Mobile landscape: anchor to the bottom of the screen (small padding) so it sits in the lower band.
+        const gapGame = isMobile ? this.cssPixelsToGamePixels(10, gameHeight) : 20;
+        const coveredGame = isMobile && !isLandscape ? this.getBottomCoveredGamePixels(gameHeight) : 0;
+        const bottomMargin = coveredGame + gapGame;
+
+        const yPosition = gameHeight - bottomMargin - (boxHeight / 2);
+        const clampedY = Phaser.Math.Clamp(yPosition, boxHeight / 2 + 6, gameHeight - boxHeight / 2 - 6);
+
+        this.container.setScale(1);
+        this.container.setPosition(gameWidth / 2, clampedY);
+    }
+
     private create() {
-        const width = 600;
-        const height = 100;
+        // Make dialogue box responsive
+        const isMobile = !this.scene.game.device.os.desktop;
+        const screenWidth = this.scene.scale.width;
+        
+        const width = isMobile ? Math.min(400, screenWidth * 0.85) : Math.min(600, screenWidth * 0.9);
+        const height = isMobile ? 120 : 100;
+
+        this.layoutWidth = width;
+        this.layoutHeight = height;
         
         this.background = this.scene.add.rectangle(0, 0, width, height, 0x000000, 0.6);
         this.background.setStrokeStyle(3, 0x6e84e7);
@@ -68,7 +162,6 @@ export default class DialogueBox {
         this.text.setOrigin(0.5);
         
         // Create button sprite (will choose correct texture when showing)
-        const isMobile = !this.scene.game.device.os.desktop;
         const buttonKey = isMobile ? 'a_button' : 'e_key_button';
         this.buttonSprite = this.scene.add.image(0, 0, buttonKey);
         this.buttonSprite.setOrigin(1, 1); // Bottom right origin
@@ -97,6 +190,14 @@ export default class DialogueBox {
         if (baseScene.registerUIObject) {
             baseScene.registerUIObject(this.container);
         }
+
+        // Keep layout/position correct when rotating/resizing.
+        this.scene.scale.on('resize', () => {
+            this.updateLayout();
+            if (this.isVisible) {
+                this.positionContainer();
+            }
+        });
     }
 
     private paginateText(message: string): string[] {
@@ -215,22 +316,15 @@ export default class DialogueBox {
     }
 
     show(messageOrOptions: string | DialogueOptions) {
-        console.log('DialogueBox.show called with:', messageOrOptions);
         const { text, keyWord, keyWordColor, onClose } = typeof messageOrOptions === 'string'
             ? { text: messageOrOptions, keyWord: undefined, keyWordColor: undefined, onClose: undefined }
             : messageOrOptions;
         
         this.onClose = onClose;
 
-        const gameWidth = this.scene.scale.width;
-        const gameHeight = this.scene.scale.height;
-
-        // UI camera uses zoom=1, so keep the dialogue at a fixed screen-space size and position.
-        // Place at bottom-center with a comfortable margin.
-        const boxHeight = 100;
-        const marginBottom = 20;
-        this.container.setScale(1);
-        this.container.setPosition(gameWidth / 2, gameHeight - boxHeight / 2 - marginBottom);
+        // Ensure we size and place based on the CURRENT viewport and real controls overlap.
+        this.updateLayout();
+        this.positionContainer();
         
         // Prepare text with replacements
         let processedText = text;

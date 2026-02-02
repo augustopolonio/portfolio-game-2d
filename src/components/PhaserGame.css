@@ -1,30 +1,54 @@
 .phaser-game-wrapper {
     width: 100%;
-    height: 100vh;
+    height: var(--app-height, 100vh);
+    --mobile-controls-height: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     position: relative;
     overflow: hidden;
     margin: 0;
     padding: 0;
+    background-color: #000000;
 }
 
 .phaser-game-container {
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     margin: 0;
     padding: 0;
+    background-color: #000000;
+}
+
+/* When mobile controls are visible (fixed overlay), reserve space so the game canvas ends above them. */
+.phaser-game-wrapper.has-mobile-controls {
+    justify-content: flex-start;
+    box-sizing: border-box;
+}
+
+/* Portrait: reserve space so the canvas ends above the controls (best for readability) */
+.phaser-game-wrapper.has-mobile-controls.portrait {
+    padding-bottom: calc(var(--mobile-controls-height) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Landscape: don't reserve space; let the canvas use full height and overlay controls */
+.phaser-game-wrapper.has-mobile-controls.landscape {
+    padding-bottom: 0;
+    /* Controls are very tall in landscape; shrink them a bit */
+    --mobile-controls-height: 140px;
 }
 
 .phaser-game-container canvas {
     display: block;
-    max-width: 100%;
-    max-height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    /* Fill the available space (no black bars). This may stretch slightly on very tall screens. */
+    object-fit: fill;
+    object-position: center;
 }
 
 /* Portrait mode - controls at bottom */
@@ -42,17 +66,17 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 200px;
+    height: calc(var(--mobile-controls-height) + env(safe-area-inset-bottom, 0px));
 }
 
 /* Landscape mode - controls at bottom */
 .phaser-game-wrapper.landscape {
-    height: 100vh;
+    height: var(--app-height, 100vh);
 }
 
 .phaser-game-wrapper.landscape .phaser-game-container {
     width: 100%;
-    height: 85%;
+    height: 100%;
 }
 
 .phaser-game-wrapper.landscape .mobile-controls {
@@ -60,5 +84,5 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 200px;
+    height: calc(var(--mobile-controls-height) + env(safe-area-inset-bottom, 0px));
 }
