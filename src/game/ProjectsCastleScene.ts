@@ -130,6 +130,9 @@ export default class ProjectsCastleScene extends BaseScene {
                 keySprite.setOrigin(0.5, 0.5);
                 keySprite.setDepth(openChest.depth + 1);
 
+                // This is a world-space sprite; keep it out of the UI camera to avoid a tiny duplicate.
+                this.uiCamera?.ignore(keySprite);
+
                 this.sound.play('chest_open', { volume: 0.5 });
 
                 this.tweens.add({
