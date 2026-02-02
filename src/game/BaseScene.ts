@@ -253,7 +253,10 @@ export default abstract class BaseScene extends Phaser.Scene {
     }
 
     protected ensureUICamera() {
-        if (this.uiCamera) return;
+        // Check if the camera exists AND is still active (not destroyed from a previous scene stop)
+        if (this.uiCamera && this.cameras.cameras.includes(this.uiCamera)) {
+            return;
+        }
 
         // Main camera exists by default. Add a second camera on top for UI.
         this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
