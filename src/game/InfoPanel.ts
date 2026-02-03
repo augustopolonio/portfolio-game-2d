@@ -56,6 +56,8 @@ export default class InfoPanel {
     private resizeListener?: () => void;
     private isDestroyed = false;
 
+    private hudPrevState?: { active: boolean; visible: boolean };
+
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
         
@@ -813,6 +815,10 @@ export default class InfoPanel {
         this.recomputeScrollBounds();
         
         this.container.setVisible(true);
+
+        // Hide HUD while the panel is open (HUD is a separate Scene rendered above this one)
+        this.setHudSceneVisible(false);
+
         this.scene.input.keyboard?.enabled && this.scene.input.keyboard.resetKeys();
 
         // Enable polling of mobileInput (virtual joystick + A button)
@@ -869,6 +875,9 @@ export default class InfoPanel {
     close() {
         this.container.setVisible(false);
 
+        // Restore HUD visibility when closing.
+        this.setHudSceneVisible(true);
+
         // If close was triggered by the mobile interact button, the interact flag may still be true
         // for a short time. Keep movement locked until the button is released.
         const mobileInput = (this.scene.registry.get('mobileInput') as any) || { x: 0, y: 0, interact: false };
@@ -902,6 +911,9 @@ export default class InfoPanel {
         if (this.isDestroyed) return;
         this.isDestroyed = true;
 
+        // Ensure HUD is restored if the panel is destroyed while open.
+        this.setHudSceneVisible(true);
+
         if (this.keyboardListener) {
             window.removeEventListener('keydown', this.keyboardListener);
         }
@@ -914,5 +926,39 @@ export default class InfoPanel {
         this.removeUpdateListener();
         this.contentMaskGfx?.destroy();
         this.container.destroy();
+    }
+
+    private setHudSceneVisible(visible: boolean) {
+        const scenePlugin = this.scene.scene;
+        if (!scenePlugin) return;
+
+        let hud: Phaser.Scene | undefined;
+        try {
+            hud = scenePlugin.get('HUDScene') as Phaser.Scene;
+        } catch {
+            return;
+        }
+        if (!hud) return;
+
+        if (!visible) {
+            if (!this.hudPrevState) {
+                this.hudPrevState = {
+                    active: !!hud.sys.settings.active,
+                    visible: !!hud.sys.settings.visible,
+                };
+            }
+            hud.scene.setVisible(false);
+            hud.scene.setActive(false);
+        } else {
+            if (this.hudPrevState) {
+                hud.scene.setVisible(this.hudPrevState.visible);
+                hud.scene.setActive(this.hudPrevState.active);
+                this.hudPrevState = undefined;
+            } else {
+                // Default restore
+                hud.scene.setVisible(true);
+                hud.scene.setActive(true);
+            }
+        }
     }
 }
