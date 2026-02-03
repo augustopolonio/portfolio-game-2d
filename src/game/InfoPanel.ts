@@ -201,7 +201,9 @@ export default class InfoPanel {
 
         const contentBounds = this.getContentBounds();
         const viewportHeight = this.panelHeight - this.headerHeight - footerHeight - padding * 2;
-        this.maxScrollY = Math.max(0, contentBounds.height - Math.max(0, viewportHeight));
+        // Give extra bottom room so the last line/badges never sit under the footer.
+        const extraBottom = padding;
+        this.maxScrollY = Math.max(0, (contentBounds.height + extraBottom) - Math.max(0, viewportHeight));
         this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
         this.updateContentPosition();
     }
@@ -413,7 +415,8 @@ export default class InfoPanel {
     private renderGameContent(game: GameData) {
         this.content.removeAll(true);
 
-        let yOffset = 0;
+        // Small inset so top badges/text aren't clipped by the content mask.
+        let yOffset = 18;
 
         // Status and Engine badges at top
         const statusColor = game.status === 'released' ? '#4ade80' : '#fbbf24';
@@ -499,28 +502,6 @@ export default class InfoPanel {
         this.content.add(description);
         yOffset += description.height + 20;
 
-        // Tags
-        if (game.tags.length > 0) {
-            const tagsTitle = this.scene.add.text(0, yOffset, 'Tags:', {
-                fontSize: '16px',
-                color: '#888888',
-                fontStyle: 'bold',
-            });
-            tagsTitle.setOrigin(0.5, 0);
-            this.content.add(tagsTitle);
-            yOffset += tagsTitle.height + 10;
-
-            const tagsText = this.scene.add.text(0, yOffset, game.tags.join(' • '), {
-                fontSize: '14px',
-                color: '#aaaaaa',
-                align: 'center',
-                wordWrap: { width: this.panelWidth - 100 },
-            });
-            tagsText.setOrigin(0.5, 0);
-            this.content.add(tagsText);
-            yOffset += tagsText.height + 60; // Increased margin
-        }
-
         // Fixed footer actions
         if (game.link && !game.link.includes('/unreleased-projects')) {
             this.setFooterActions([
@@ -536,12 +517,17 @@ export default class InfoPanel {
         } else {
             this.setFooterActions([{ text: 'Close', action: () => this.close() }]);
         }
+
+        // Async image/content affects scroll bounds; recompute if panel is already showing.
+        if (this.container.visible) {
+            this.recomputeScrollBounds();
+        }
     }
 
     private renderExperienceContent(experience: ExperienceData) {
         this.content.removeAll(true);
 
-        let yOffset = 0;
+        let yOffset = 10;
 
         // Company & Title
         const company = this.scene.add.text(0, yOffset, experience.company, {
@@ -823,10 +809,24 @@ export default class InfoPanel {
     }
 
     private getContentBounds(): { height: number } {
-        let minY = 0;
-        let maxY = 0;
-        
+        // Use getBounds() so nested Containers (badges, tech rows, etc.) count toward height.
+        // Containers often report height=0, which breaks scroll calculations.
+        let minY = Number.POSITIVE_INFINITY;
+        let maxY = Number.NEGATIVE_INFINITY;
+
         this.content.iterate((child: any) => {
+            if (!child) return;
+
+            if (typeof child.getBounds === 'function') {
+                const b = child.getBounds();
+                if (Number.isFinite(b.top) && Number.isFinite(b.bottom)) {
+                    minY = Math.min(minY, b.top);
+                    maxY = Math.max(maxY, b.bottom);
+                    return;
+                }
+            }
+
+            // Fallback for objects without getBounds
             if (child.y !== undefined) {
                 const childTop = child.y - (child.height || 0) * (child.originY || 0);
                 const childBottom = child.y + (child.height || 0) * (1 - (child.originY || 0));
@@ -834,8 +834,12 @@ export default class InfoPanel {
                 maxY = Math.max(maxY, childBottom);
             }
         });
-        
-        return { height: maxY - minY };
+
+        if (!Number.isFinite(minY) || !Number.isFinite(maxY)) {
+            return { height: 0 };
+        }
+
+        return { height: Math.max(0, maxY - minY) };
     }
 
     close() {
