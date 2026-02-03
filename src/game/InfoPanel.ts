@@ -25,8 +25,14 @@ interface GameData {
 export default class InfoPanel {
     private scene: Phaser.Scene;
     private container: Phaser.GameObjects.Container;
+    private overlay: Phaser.GameObjects.Rectangle;
     private background: Phaser.GameObjects.Rectangle;
     private content: Phaser.GameObjects.Container;
+    private footer: Phaser.GameObjects.Container;
+    private footerDivider: Phaser.GameObjects.Rectangle;
+    private footerButtons: Phaser.GameObjects.Container;
+    private contentMaskGfx: Phaser.GameObjects.Graphics;
+    private contentMask: Phaser.Display.Masks.GeometryMask;
     private closeCallback?: () => void;
     private buttons: Array<{ container: Phaser.GameObjects.Container; action: () => void }> = [];
     private focusedButtonIndex = 0;
@@ -41,22 +47,17 @@ export default class InfoPanel {
     private panelWidth = 700;
     private panelHeight = 500;
 
+    private readonly mobileFooterHeight = 86;
+    private readonly desktopFooterHeight = 76;
+    private readonly mobilePadding = 16;
+    private readonly desktopPadding = 24;
+    private readonly headerHeight = 0;
+
+    private resizeListener?: () => void;
+    private isDestroyed = false;
+
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
-        
-        // Make panel responsive based on screen size
-        const isMobile = !this.scene.game.device.os.desktop;
-        const screenWidth = this.scene.scale.width;
-        const screenHeight = this.scene.scale.height;
-        
-        if (isMobile) {
-            // Narrower on mobile to avoid overlapping controls
-            this.panelWidth = Math.min(400, screenWidth * 0.85);
-            this.panelHeight = Math.min(450, screenHeight * 0.55);
-        } else {
-            this.panelWidth = Math.min(700, screenWidth * 0.9);
-            this.panelHeight = Math.min(500, screenHeight * 0.8);
-        }
         
         // Create main container - will be positioned and scaled based on camera
         this.container = this.scene.add.container(0, 0);
@@ -71,24 +72,138 @@ export default class InfoPanel {
         }
 
         // Background overlay (full screen)
-        const gameWidth = this.scene.scale.width;
-        const gameHeight = this.scene.scale.height;
-        const overlay = this.scene.add.rectangle(0, 0, gameWidth * 10, gameHeight * 10, 0x000000, 0.7);
-        overlay.setOrigin(0.5);
-        overlay.setInteractive(); // Block clicks from passing through
-        this.container.add(overlay);
+        this.overlay = this.scene.add.rectangle(0, 0, this.scene.scale.width, this.scene.scale.height, 0x000000, 0.75);
+        this.overlay.setOrigin(0.5);
+        this.overlay.setInteractive(); // Block clicks from passing through
+        this.container.add(this.overlay);
 
         // Panel background
         this.background = this.scene.add.rectangle(0, 0, this.panelWidth, this.panelHeight, 0x000000, 0.6);
         this.background.setStrokeStyle(3, 0x6e84e7);
         this.container.add(this.background);
 
-        // Content container (will hold scrollable content)
-        this.content = this.scene.add.container(0, -this.panelHeight / 2 + 20);
+        // Content container (scrollable)
+        this.content = this.scene.add.container(0, 0);
         this.container.add(this.content);
+
+        // Footer (fixed action bar)
+        this.footer = this.scene.add.container(0, 0);
+        this.footerDivider = this.scene.add.rectangle(0, 0, this.panelWidth, 2, 0x6e84e7, 0.35);
+        this.footerButtons = this.scene.add.container(0, 0);
+        this.footer.add([this.footerDivider, this.footerButtons]);
+        this.container.add(this.footer);
+
+        // Clip content to the panel viewport (prevents text/buttons from drawing under the footer)
+        // IMPORTANT: don't add the mask Graphics to the display list, otherwise it will render
+        // as a solid rectangle (Canvas renderer) or as a normal Graphics draw.
+        this.contentMaskGfx = this.scene.make.graphics({ x: 0, y: 0, add: false } as any);
+        this.contentMask = new Phaser.Display.Masks.GeometryMask(this.scene, this.contentMaskGfx);
+        this.content.setMask(this.contentMask);
+
+        // Initial layout; will be recomputed on show/resize.
+        this.updateLayout();
+        this.positionContainer();
 
         // Setup keyboard navigation
         this.setupKeyboardNavigation();
+
+        // Keep layout/position correct when rotating/resizing.
+        this.resizeListener = () => {
+            this.updateLayout();
+            if (this.container.visible) {
+                this.positionContainer();
+                this.recomputeScrollBounds();
+            }
+        };
+        this.scene.scale.on('resize', this.resizeListener);
+
+        // Ensure we clean up global listeners when the scene shuts down.
+        this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.destroy());
+        this.scene.events.once(Phaser.Scenes.Events.DESTROY, () => this.destroy());
+    }
+
+    private getPadding(): number {
+        const isMobile = !this.scene.game.device.os.desktop;
+        return isMobile ? this.mobilePadding : this.desktopPadding;
+    }
+
+    private getFooterHeight(): number {
+        const isMobile = !this.scene.game.device.os.desktop;
+        return isMobile ? this.mobileFooterHeight : this.desktopFooterHeight;
+    }
+
+    private updateLayout() {
+        const isMobile = !this.scene.game.device.os.desktop;
+        const gameWidth = this.scene.scale.width;
+        const gameHeight = this.scene.scale.height;
+
+        if (isMobile) {
+            // Full-screen modal on mobile for readability
+            this.panelWidth = gameWidth;
+            this.panelHeight = gameHeight;
+        } else {
+            // Large centered modal on desktop
+            this.panelWidth = Math.min(900, gameWidth * 0.92);
+            this.panelHeight = Math.min(680, gameHeight * 0.9);
+        }
+
+        // Keep overlay and panel sized to current screen-space.
+        this.overlay.setSize(gameWidth, gameHeight);
+        this.overlay.setDisplaySize(gameWidth, gameHeight);
+        this.background.setSize(this.panelWidth, this.panelHeight);
+        this.background.setDisplaySize(this.panelWidth, this.panelHeight);
+
+        // Footer sizing and placement (relative to panel)
+        const footerHeight = this.getFooterHeight();
+        this.footerDivider.setSize(this.panelWidth, 2);
+        this.footerDivider.setDisplaySize(this.panelWidth, 2);
+        this.footerDivider.setPosition(0, -footerHeight / 2);
+        this.footer.setPosition(0, this.panelHeight / 2 - footerHeight / 2);
+
+        // Update content base position and mask
+        const padding = this.getPadding();
+        const contentTopY = -this.panelHeight / 2 + this.headerHeight + padding;
+        this.content.setPosition(0, contentTopY - this.scrollY);
+
+        const viewportHeight = this.panelHeight - this.headerHeight - footerHeight - padding * 2;
+        const viewportWidth = this.panelWidth - padding * 2;
+
+        // Keep mask aligned with the container (content is drawn in container-local coords)
+        this.contentMaskGfx.setPosition(this.container.x, this.container.y);
+
+        this.contentMaskGfx.clear();
+        this.contentMaskGfx.fillStyle(0xffffff, 1);
+        this.contentMaskGfx.fillRect(
+            -viewportWidth / 2,
+            contentTopY,
+            viewportWidth,
+            Math.max(0, viewportHeight)
+        );
+    }
+
+    private positionContainer() {
+        const gameWidth = this.scene.scale.width;
+        const gameHeight = this.scene.scale.height;
+
+        // UI camera uses zoom=1, so keep it in screen-space coordinates.
+        this.container.setScale(1);
+
+        // Always center the modal in screen space.
+        this.container.setPosition(gameWidth / 2, gameHeight / 2);
+
+        // Keep mask aligned with the container (mask is defined in container-local coords)
+        this.contentMaskGfx.setPosition(this.container.x, this.container.y);
+    }
+
+    private recomputeScrollBounds() {
+        const padding = this.getPadding();
+        const footerHeight = this.getFooterHeight();
+
+        const contentBounds = this.getContentBounds();
+        const viewportHeight = this.panelHeight - this.headerHeight - footerHeight - padding * 2;
+        this.maxScrollY = Math.max(0, contentBounds.height - Math.max(0, viewportHeight));
+        this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
+        this.updateContentPosition();
     }
 
     private setupKeyboardNavigation() {
@@ -192,8 +307,8 @@ export default class InfoPanel {
     }
 
     private updateContentPosition() {
-        // Content starts at top of panel with some padding
-        const baseY = -this.panelHeight / 2 + 20;
+        const padding = this.getPadding();
+        const baseY = -this.panelHeight / 2 + this.headerHeight + padding;
         this.content.setY(baseY - this.scrollY);
     }
 
@@ -406,39 +521,21 @@ export default class InfoPanel {
             yOffset += tagsText.height + 60; // Increased margin
         }
 
-        // Buttons container
-        const buttonsContainer = this.scene.add.container(0, yOffset);
-        this.buttons = [];
-
-        // Play Game button (if link available)
+        // Fixed footer actions
         if (game.link && !game.link.includes('/unreleased-projects')) {
-            const playBtn = this.createButton('Play Game', () => {
-                Analytics.trackExternalLinkClick(game.link, game.title);
-                window.open(game.link, '_blank');
-            });
-            playBtn.setPosition(-110, 0);
-            buttonsContainer.add(playBtn);
+            this.setFooterActions([
+                {
+                    text: 'Play Game',
+                    action: () => {
+                        Analytics.trackExternalLinkClick(game.link, game.title);
+                        window.open(game.link, '_blank');
+                    },
+                },
+                { text: 'Close', action: () => this.close() },
+            ]);
         } else {
-            // If no link, center the close button
-            const closeBtn = this.createButton('Close', () => this.close());
-            closeBtn.setPosition(0, 0);
-            buttonsContainer.add(closeBtn);
-            this.content.add(buttonsContainer);
-            this.focusedButtonIndex = 0;
-            this.updateButtonHighlight(0, true);
-            return;
+            this.setFooterActions([{ text: 'Close', action: () => this.close() }]);
         }
-
-        // Close button
-        const closeBtn = this.createButton('Close', () => this.close());
-        closeBtn.setPosition(110, 0);
-        buttonsContainer.add(closeBtn);
-
-        this.content.add(buttonsContainer);
-        
-        // Set initial focus
-        this.focusedButtonIndex = 0;
-        this.updateButtonHighlight(0, true);
     }
 
     private renderExperienceContent(experience: ExperienceData) {
@@ -573,15 +670,37 @@ export default class InfoPanel {
             yOffset += maxYPos + 35 + 20; // tech badge height + spacing
         }
 
-        // Close button - positioned after all content
+        // Fixed footer actions
+        this.setFooterActions([{ text: 'Close', action: () => this.close() }]);
+    }
+
+    private setFooterActions(actions: Array<{ text: string; action: () => void }>) {
+        this.footerButtons.removeAll(true);
         this.buttons = [];
-        const closeBtn = this.createButton('Close', () => this.close());
-        closeBtn.setPosition(0, yOffset);
-        this.content.add(closeBtn);
-        
-        // Set initial focus
+
+        const isMobile = !this.scene.game.device.os.desktop;
+        const availableWidth = this.panelWidth - this.getPadding() * 2;
+
+        const maxButtons = Math.max(1, actions.length);
+        const gap = isMobile ? 12 : 16;
+        const buttonWidth = Math.min(220, Math.floor((availableWidth - gap * (maxButtons - 1)) / maxButtons));
+        const buttonHeight = isMobile ? 44 : 40;
+
+        const totalWidth = buttonWidth * maxButtons + gap * (maxButtons - 1);
+        let x = -totalWidth / 2 + buttonWidth / 2;
+
+        actions.forEach((a) => {
+            const btn = this.createButton(a.text, a.action, { width: buttonWidth, height: buttonHeight, fontSize: isMobile ? 16 : 16 });
+            btn.setPosition(x, 10);
+            this.footerButtons.add(btn);
+            x += buttonWidth + gap;
+        });
+
+        // Initial focus
         this.focusedButtonIndex = 0;
-        this.updateButtonHighlight(0, true);
+        if (this.buttons.length > 0) {
+            this.updateButtonHighlight(0, true);
+        }
     }
 
     private createBadge(text: string, color: string, xOffset: number): Phaser.GameObjects.Container {
@@ -611,11 +730,16 @@ export default class InfoPanel {
         return container;
     }
 
-    private createButton(text: string, action: () => void): Phaser.GameObjects.Container {
+    private createButton(
+        text: string,
+        action: () => void,
+        options?: { width?: number; height?: number; fontSize?: number }
+    ): Phaser.GameObjects.Container {
         const container = this.scene.add.container(0, 0);
-        
-        const buttonWidth = 200;
-        const buttonHeight = 40;
+
+        const buttonWidth = options?.width ?? 200;
+        const buttonHeight = options?.height ?? 40;
+        const fontSize = options?.fontSize ?? 16;
         
         // Use gray color for Close button, blue for others
         const isCloseButton = text === 'Close';
@@ -626,7 +750,7 @@ export default class InfoPanel {
         bg.setStrokeStyle(2, borderColor);
         
         const label = this.scene.add.text(0, 0, text, {
-            fontSize: '16px',
+            fontSize: `${fontSize}px`,
             color: '#ffffff',
             fontStyle: 'bold',
         });
@@ -665,26 +789,18 @@ export default class InfoPanel {
         });
         errorText.setOrigin(0.5);
         this.content.add(errorText);
+        this.setFooterActions([{ text: 'Close', action: () => this.close() }]);
         this.show();
     }
 
     show() {
-        const gameWidth = this.scene.scale.width;
-        const gameHeight = this.scene.scale.height;
-        const isMobile = !this.scene.game.device.os.desktop;
+        // Recompute layout for the current viewport
+        this.updateLayout();
+        this.positionContainer();
 
-        // UI camera uses zoom=1, so keep it in screen-space coordinates.
-        this.container.setScale(1);
-        
-        // Position higher on mobile to avoid controls at bottom
-        const yOffset = isMobile ? -50 : 0;
-        this.container.setPosition(gameWidth / 2, gameHeight / 2 + yOffset);
-        
-        // Calculate max scroll based on content height
-        const contentBounds = this.getContentBounds();
-        this.maxScrollY = Math.max(0, contentBounds.height - (this.panelHeight - 80));
+        // Reset scroll and compute bounds
         this.scrollY = 0;
-        this.updateContentPosition();
+        this.recomputeScrollBounds();
         
         this.container.setVisible(true);
         this.scene.input.keyboard?.enabled && this.scene.input.keyboard.resetKeys();
@@ -755,10 +871,20 @@ export default class InfoPanel {
     }
 
     destroy() {
+        if (this.isDestroyed) return;
+        this.isDestroyed = true;
+
         if (this.keyboardListener) {
             window.removeEventListener('keydown', this.keyboardListener);
         }
+
+        if (this.resizeListener) {
+            this.scene.scale.off('resize', this.resizeListener);
+            this.resizeListener = undefined;
+        }
+
         this.removeUpdateListener();
+        this.contentMaskGfx?.destroy();
         this.container.destroy();
     }
 }

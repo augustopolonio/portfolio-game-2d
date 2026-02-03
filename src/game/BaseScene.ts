@@ -17,6 +17,7 @@ export default abstract class BaseScene extends Phaser.Scene {
     protected interactionIndicator!: Phaser.GameObjects.Image;
     protected movementLocked = false;
     protected uiCamera?: Phaser.Cameras.Scene2D.Camera;
+    private uiCameraResizeListener?: (gameSize: Phaser.Structs.Size) => void;
     private lastInteractState = false;
     private lastDirection = 'down';
     private interactableZones: Map<Phaser.GameObjects.Zone, any> = new Map();
@@ -229,6 +230,17 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.ensureUICamera();
 
         this.dialogueBox = new DialogueBox(this);
+
+        // Cleanup UI listeners/objects on scene shutdown to prevent resize callbacks
+        // firing against destroyed objects (common during orientation changes).
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.dialogueBox?.destroy();
+
+            if (this.uiCameraResizeListener) {
+                this.scale.off('resize', this.uiCameraResizeListener);
+                this.uiCameraResizeListener = undefined;
+            }
+        });
         
         // Create interaction indicator sprite
         const isMobile = !this.game.device.os.desktop;
@@ -269,9 +281,17 @@ export default abstract class BaseScene extends Phaser.Scene {
         this.uiCamera.ignore(this.children.list);
 
         // Keep the UI camera sized correctly.
-        this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
-            this.uiCamera?.setSize(gameSize.width, gameSize.height);
-        });
+        // If we recreate the UI camera, ensure we don't keep old listeners around.
+        if (this.uiCameraResizeListener) {
+            this.scale.off('resize', this.uiCameraResizeListener);
+        }
+        this.uiCameraResizeListener = (gameSize: Phaser.Structs.Size) => {
+            // During shutdown, camera may be partially destroyed.
+            if (!this.uiCamera) return;
+            if (!(this.cameras.cameras || []).includes(this.uiCamera)) return;
+            this.uiCamera.setSize(gameSize.width, gameSize.height);
+        };
+        this.scale.on('resize', this.uiCameraResizeListener);
     }
 
     /**

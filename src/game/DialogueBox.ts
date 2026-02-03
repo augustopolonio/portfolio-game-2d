@@ -25,6 +25,9 @@ export default class DialogueBox {
 
     private layoutWidth = 0;
     private layoutHeight = 0;
+
+    private resizeListener?: () => void;
+    private isDestroyed = false;
     
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
@@ -58,6 +61,8 @@ export default class DialogueBox {
     }
 
     private updateLayout() {
+        if (this.isDestroyed) return;
+
         const isMobile = !this.scene.game.device.os.desktop;
         const screenWidth = this.scene.scale.width;
         const screenHeight = this.scene.scale.height;
@@ -74,11 +79,16 @@ export default class DialogueBox {
         this.layoutWidth = nextWidth;
         this.layoutHeight = nextHeight;
 
-        if (!this.background) return;
+        // If this instance was destroyed (scene transition), or if its game objects were
+        // already destroyed by the Scene, skip.
+        if (!this.background || !this.buttonSprite) return;
+        if (!this.background.scene || !this.buttonSprite.scene) return;
+        if (!this.background.active || !this.buttonSprite.active) return;
+        if (!(this.background as any).geom) return;
 
         if (sizeChanged) {
-            this.background.setSize(this.layoutWidth, this.layoutHeight);
-            this.background.setDisplaySize(this.layoutWidth, this.layoutHeight);
+            this.background?.setSize(this.layoutWidth, this.layoutHeight);
+            this.background?.setDisplaySize(this.layoutWidth, this.layoutHeight);
 
             // RexBBCodeText supports fixed size; Text fallback supports wordWrap width.
             if (this.text?.setFixedSize) {
@@ -88,7 +98,7 @@ export default class DialogueBox {
                 this.text.setWordWrapWidth(this.layoutWidth - 20);
             }
 
-            this.buttonSprite.setPosition(this.layoutWidth / 2 - 10, this.layoutHeight / 2 - 10);
+            this.buttonSprite?.setPosition(this.layoutWidth / 2 - 10, this.layoutHeight / 2 - 10);
         }
     }
 
@@ -191,13 +201,18 @@ export default class DialogueBox {
             baseScene.registerUIObject(this.container);
         }
 
+        // Ensure we clean up global listeners when the scene shuts down.
+        this.scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.destroy());
+        this.scene.events.once(Phaser.Scenes.Events.DESTROY, () => this.destroy());
+
         // Keep layout/position correct when rotating/resizing.
-        this.scene.scale.on('resize', () => {
+        this.resizeListener = () => {
             this.updateLayout();
             if (this.isVisible) {
                 this.positionContainer();
             }
-        });
+        };
+        this.scene.scale.on('resize', this.resizeListener);
     }
 
     private paginateText(message: string): string[] {
@@ -394,7 +409,14 @@ export default class DialogueBox {
     }
 
     destroy() {
+        if (this.isDestroyed) return;
+        this.isDestroyed = true;
+
         this.typewriterEvent?.destroy();
-        this.container.destroy();
+        if (this.resizeListener) {
+            this.scene.scale.off('resize', this.resizeListener);
+            this.resizeListener = undefined;
+        }
+        this.container?.destroy();
     }
 }
