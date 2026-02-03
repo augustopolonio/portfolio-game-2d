@@ -423,11 +423,35 @@ export default class InfoPanel {
         const statusText = game.status === 'released' ? 'Released' : 'In Development';
         
         const badgeContainer = this.scene.add.container(0, yOffset);
-        const statusBadge = this.createBadge(statusText, statusColor, -60);
-        const engineBadge = this.createBadge(game.engine.toUpperCase(), '#3b82f6', 60);
+        const statusBadge = this.createBadge(statusText, statusColor, 0);
+        const engineBadge = this.createBadge(game.engine.toUpperCase(), '#3b82f6', 0);
+
+        // Space badges based on their real widths so longer text doesn't overlap.
+        const gap = 14;
+        const statusBg = statusBadge.getAt(0) as Phaser.GameObjects.Rectangle;
+        const engineBg = engineBadge.getAt(0) as Phaser.GameObjects.Rectangle;
+        const statusW = statusBg.displayWidth || statusBg.width;
+        const engineW = engineBg.displayWidth || engineBg.width;
+        const totalW = statusW + gap + engineW;
+
+        const padding = this.getPadding();
+        const maxW = this.panelWidth - padding * 2;
+        const badgeH = Math.max(statusBg.displayHeight || statusBg.height, engineBg.displayHeight || engineBg.height);
+
+        if (totalW > maxW) {
+            // Too tight: stack vertically and keep centered.
+            statusBadge.setPosition(0, 0);
+            engineBadge.setPosition(0, badgeH + 10);
+            yOffset += badgeH * 2 + 18;
+        } else {
+            // Side-by-side with consistent gap.
+            statusBadge.setPosition(-totalW / 2 + statusW / 2, 0);
+            engineBadge.setPosition(totalW / 2 - engineW / 2, 0);
+            yOffset += badgeH + 12;
+        }
+
         badgeContainer.add([statusBadge, engineBadge]);
         this.content.add(badgeContainer);
-        yOffset += 35;
 
         // Title above image
         const title = this.scene.add.text(0, yOffset, game.title, {
