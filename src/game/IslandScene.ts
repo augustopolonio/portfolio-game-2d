@@ -3,8 +3,10 @@ import { TiledMapLoader, type MapConfig } from './TiledMapLoader';
 import { PLAYER_CONFIG } from './GameConfig';
 import OutlineEffect from './OutlineEffect';
 import { Analytics } from '../utils/analytics';
+import WelcomePanel from './WelcomePanel';
 
 export default class IslandScene extends BaseScene {
+    private welcomePanel!: WelcomePanel;
     private mapConfig: MapConfig = {
         tilesetFolder: 'P_P_FREE_RPG_TILESET',
         tilesets: [
@@ -83,6 +85,9 @@ export default class IslandScene extends BaseScene {
         this.setupInteractables(map); // 'System/Interactables'
         this.setupInput();
         this.setupCamera(map);
+
+        // Create the WelcomePanel after setupInput() so it gets registered on the UI camera.
+        this.welcomePanel = new WelcomePanel(this);
         
         // Show environment name when returning to island (if not first time)
         if (this.registry.get('hasWelcomeShown')) {
@@ -130,6 +135,17 @@ export default class IslandScene extends BaseScene {
     
     protected handleInteraction(obj: any) {
         let onCloseCallback: (() => void) | undefined;
+
+        const infoType = obj.properties?.find((p: any) => p.name === 'type')?.value;
+        if (infoType === 'welcome_info') {
+            this.welcomePanel.show({
+                message: 'Looking to connect?\nVisit my portfolio site for more info.',
+                url: 'https://augustopolonio.vercel.app',
+                primaryText: 'Open Portfolio',
+                secondaryText: 'Not now',
+            });
+            return;
+        }
 
         if (obj.type === 'door') {
             const locked = obj.properties?.find((p: any) => p.name === 'locked')?.value;
