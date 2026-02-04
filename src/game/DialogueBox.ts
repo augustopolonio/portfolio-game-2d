@@ -23,6 +23,8 @@ export default class DialogueBox {
     private visibleIndexToFormattedIndex: number[] = [];
     private onClose?: () => void;
 
+    private processedText = '';
+
     private layoutWidth = 0;
     private layoutHeight = 0;
 
@@ -98,7 +100,29 @@ export default class DialogueBox {
                 this.text.setWordWrapWidth(this.layoutWidth - 20);
             }
 
+            // Some rexBBCodeText versions use wrap.width instead of setWordWrapWidth.
+            const wrapWidth = this.layoutWidth - 20;
+            if ((this.text as any)?.setWrapWidth) {
+                (this.text as any).setWrapWidth(wrapWidth);
+            }
+            if ((this.text as any)?.style?.wrap) {
+                (this.text as any).style.wrap.width = wrapWidth;
+            }
+            if ((this.text as any)?.updateText) {
+                (this.text as any).updateText();
+            }
+
             this.buttonSprite?.setPosition(this.layoutWidth / 2 - 10, this.layoutHeight / 2 - 10);
+
+            // If the dialogue is currently showing, re-paginate so wrapping/page length adapts.
+            if (this.isVisible && this.processedText) {
+                const prevPage = this.currentPage;
+                this.pages = this.paginateText(this.processedText);
+                this.currentPage = Phaser.Math.Clamp(prevPage, 0, Math.max(0, this.pages.length - 1));
+                this.typewriterEvent?.destroy();
+                this.isTyping = false;
+                this.showCurrentPage();
+            }
         }
     }
 
@@ -215,6 +239,25 @@ export default class DialogueBox {
         this.scene.scale.on('resize', this.resizeListener);
     }
 
+    private getMaxCharsPerPage(): number {
+        // Heuristic based on current layout size; keeps the text readable across resize/orientation.
+        // We don't have reliable per-character metrics for BBCode across renderers, so approximate.
+        const padding = 20;
+        const usableWidth = Math.max(120, this.layoutWidth - padding);
+        const usableHeight = Math.max(60, this.layoutHeight - padding);
+
+        // Dialogue uses ~14px pixel font. Approx character width ~8px.
+        const approxCharWidth = 8;
+        // Line height ~ (font size + line spacing). In create() lineSpacing is 12.
+        const approxLineHeight = 26;
+
+        const cols = Math.max(10, Math.floor(usableWidth / approxCharWidth));
+        const rows = Math.max(2, Math.floor(usableHeight / approxLineHeight));
+
+        // Clamp to reasonable range so huge screens don't create single mega-pages.
+        return Phaser.Math.Clamp(cols * rows, 60, 180);
+    }
+
     private paginateText(message: string): string[] {
         // Handle manual page breaks
         if (message.includes('|||')) {
@@ -226,7 +269,7 @@ export default class DialogueBox {
             return allPages;
         }
 
-        const maxChars = 100;
+        const maxChars = this.getMaxCharsPerPage();
         const pages: string[] = [];
         
         let currentIndex = 0;
@@ -360,10 +403,8 @@ export default class DialogueBox {
             processedText = processedText.split('{0}').join(replacement);
         }
         
-        console.log('Processed text:', processedText);
-
+        this.processedText = processedText;
         this.pages = this.paginateText(processedText);
-        console.log('Pages:', this.pages);
         this.currentPage = 0;
         
         this.showCurrentPage();
