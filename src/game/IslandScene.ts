@@ -140,8 +140,8 @@ export default class IslandScene extends BaseScene {
         if (infoType === 'welcome_info') {
             this.welcomePanel.show({
                 message: 'Looking to connect?\nVisit my portfolio site for more info.',
-                url: 'https://augustopolonio.vercel.app',
-                primaryText: 'Open Portfolio',
+                url: 'https://augustopolonio.vercel.app/#contact',
+                primaryText: 'Take me there',
                 secondaryText: 'Not now',
             });
             return;
