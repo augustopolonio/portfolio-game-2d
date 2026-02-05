@@ -47,6 +47,10 @@ export default class InfoPanel {
     private panelWidth = 700;
     private panelHeight = 500;
 
+    private currentGame?: GameData;
+    private currentExperience?: ExperienceData;
+    private pendingImageKeys = new Set<string>();
+
     private readonly mobileFooterHeight = 86;
     private readonly desktopFooterHeight = 76;
     private readonly mobilePadding = 16;
@@ -114,7 +118,19 @@ export default class InfoPanel {
             this.updateLayout();
             if (this.container.visible) {
                 this.positionContainer();
+
+                // Re-render current content so wordWrap widths + layout update with the new panel size.
+                // This keeps text from overflowing after desktop resize / mobile orientation changes.
+                const prevScroll = this.scrollY;
+                if (this.currentGame) {
+                    this.renderGameContent(this.currentGame);
+                } else if (this.currentExperience) {
+                    this.renderExperienceContent(this.currentExperience);
+                }
+
                 this.recomputeScrollBounds();
+                this.scrollY = Phaser.Math.Clamp(prevScroll, 0, this.maxScrollY);
+                this.updateContentPosition();
             }
         };
         this.scene.scale.on('resize', this.resizeListener);
@@ -386,6 +402,8 @@ export default class InfoPanel {
                 return;
             }
 
+            this.currentGame = game;
+            this.currentExperience = undefined;
             this.renderGameContent(game);
             this.show();
         } catch (error) {
@@ -406,6 +424,8 @@ export default class InfoPanel {
                 return;
             }
 
+            this.currentExperience = experience;
+            this.currentGame = undefined;
             this.renderExperienceContent(experience);
             this.show();
         } catch (error) {
@@ -471,16 +491,30 @@ export default class InfoPanel {
         const imageKey = `game_image_${game.id}`;
         const imageUrl = `https://augustopolonio.vercel.app${game.image}`;
         
-        // Check if already loaded
-        if (!this.scene.textures.exists(imageKey)) {
-            this.scene.load.image(imageKey, imageUrl);
-            this.scene.load.once('complete', () => {
-                this.addGameImage(imageKey, yOffset, game);
-            });
-            this.scene.load.start();
-        } else {
+        // Check if already loaded; guard against adding duplicate load listeners during resize re-renders.
+        if (this.scene.textures.exists(imageKey)) {
             this.addGameImage(imageKey, yOffset, game);
+            return;
         }
+
+        // If load is already in flight, keep the UI content without spamming load/start.
+        if (this.pendingImageKeys.has(imageKey)) {
+            // Render a placeholder; image will be injected when load completes.
+            this.addGameImage(imageKey, yOffset, game);
+            return;
+        }
+
+        this.pendingImageKeys.add(imageKey);
+        this.scene.load.image(imageKey, imageUrl);
+        this.scene.load.once('complete', () => {
+            this.pendingImageKeys.delete(imageKey);
+            // Only update if this panel is still showing the same game.
+            if (this.container.visible && this.currentGame?.id === game.id) {
+                this.addGameImage(imageKey, yOffset, game);
+                this.recomputeScrollBounds();
+            }
+        });
+        this.scene.load.start();
     }
 
     private addGameImage(imageKey: string, startYOffset: number, game: GameData) {
@@ -874,6 +908,10 @@ export default class InfoPanel {
 
     close() {
         this.container.setVisible(false);
+
+        // Clear current content pointers so we don't try to re-render after close.
+        this.currentGame = undefined;
+        this.currentExperience = undefined;
 
         // Restore HUD visibility when closing.
         this.setHudSceneVisible(true);
