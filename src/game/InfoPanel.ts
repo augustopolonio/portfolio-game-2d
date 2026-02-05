@@ -608,6 +608,10 @@ export default class InfoPanel {
 
         let yOffset = 10;
 
+        const padding = this.getPadding();
+        const contentWidth = Math.max(180, this.panelWidth - padding * 2);
+        const leftX = -(this.panelWidth / 2) + padding;
+
         // Company & Title
         const company = this.scene.add.text(0, yOffset, experience.company, {
             fontFamily: '"Press Start 2P"',
@@ -615,6 +619,7 @@ export default class InfoPanel {
             color: '#ffffff',
             fontStyle: 'bold',
             align: 'center',
+            wordWrap: { width: contentWidth },
         });
         company.setOrigin(0.5, 0);
         this.content.add(company);
@@ -626,7 +631,7 @@ export default class InfoPanel {
             fontSize: '18px',
             color: '#60a5fa',
             align: 'center',
-            wordWrap: { width: this.panelWidth - 100 },
+            wordWrap: { width: contentWidth, useAdvancedWrap: true },
         });
         jobTitle.setOrigin(0.5, 0);
         this.content.add(jobTitle);
@@ -642,6 +647,7 @@ export default class InfoPanel {
                 fontSize: '16px',
                 color: '#888888',
                 align: 'center',
+                wordWrap: { width: contentWidth, useAdvancedWrap: true },
             }
         );
         periodLocation.setOrigin(0.5, 0);
@@ -654,7 +660,7 @@ export default class InfoPanel {
             fontSize: '14px',
             color: '#cccccc',
             align: 'center',
-            wordWrap: { width: this.panelWidth - 100 },
+            wordWrap: { width: contentWidth, useAdvancedWrap: true },
             lineSpacing: 5,
         });
         description.setOrigin(0.5, 0);
@@ -675,14 +681,14 @@ export default class InfoPanel {
 
             experience.highlights.forEach((highlight) => {
                 const bulletPoint = this.scene.add.text(
-                    -(this.panelWidth / 2 - 80),
+                    leftX,
                     yOffset,
                     `• ${highlight}`,
                     {
                         fontFamily: '"Press Start 2P"',
                         fontSize: '12px',
                         color: '#aaaaaa',
-                        wordWrap: { width: this.panelWidth - 140 },
+                        wordWrap: { width: contentWidth, useAdvancedWrap: true },
                         lineSpacing: 3,
                     }
                 );
@@ -708,18 +714,21 @@ export default class InfoPanel {
 
             // Create technology badges
             const techContainer = this.scene.add.container(0, yOffset);
-            let xPos = -(this.panelWidth / 2 - 80);
+            let xPos = leftX;
             let yPos = 0;
-            const maxWidth = this.panelWidth - 160;
+            const maxWidth = contentWidth;
             let currentRowWidth = 0;
 
             experience.technologies.forEach((tech, index) => {
                 const badge = this.createTechBadge(tech);
-                const badgeWidth = (tech.length * 8) + 20; // Approximate width
+                const badgeBg = badge.getAt(0) as Phaser.GameObjects.Rectangle;
+                const badgeWidth = badgeBg.displayWidth || badgeBg.width;
+                const badgeHeight = badgeBg.displayHeight || badgeBg.height;
+                const rowHeight = badgeHeight + 10;
 
                 if (currentRowWidth + badgeWidth > maxWidth && index > 0) {
                     xPos = -(this.panelWidth / 2 - 80);
-                    yPos += 35;
+                    yPos += rowHeight;
                     currentRowWidth = 0;
                 }
 
@@ -731,15 +740,23 @@ export default class InfoPanel {
             });
 
             this.content.add(techContainer);
-            
-            // Calculate total height of tech badges container
-            let maxYPos = 0;
+
+            // Compute total height of badge rows (container-local coords)
+            let maxCenterY = 0;
+            let maxHalfH = 0;
             techContainer.iterate((child: any) => {
-                if (child.y !== undefined) {
-                    maxYPos = Math.max(maxYPos, child.y);
+                if (!child) return;
+                if (typeof child.y === 'number') {
+                    maxCenterY = Math.max(maxCenterY, child.y);
+                }
+                if (typeof child.getBounds === 'function') {
+                    const b = child.getBounds();
+                    const h = Math.max(0, b.height);
+                    maxHalfH = Math.max(maxHalfH, h / 2);
                 }
             });
-            yOffset += maxYPos + 35 + 20; // tech badge height + spacing
+            const containerHeight = maxCenterY + maxHalfH * 2;
+            yOffset += containerHeight + 20;
         }
 
         // Fixed footer actions
@@ -777,7 +794,7 @@ export default class InfoPanel {
 
     private createBadge(text: string, color: string, xOffset: number): Phaser.GameObjects.Container {
         const container = this.scene.add.container(xOffset, 0);
-        const bg = this.scene.add.rectangle(0, 0, text.length * 12 + 20, 28, parseInt(color.replace('#', '0x')));
+        const bg = this.scene.add.rectangle(0, 0, 10, 28, parseInt(color.replace('#', '0x')));
         bg.setStrokeStyle(2, parseInt(color.replace('#', '0x')));
         const label = this.scene.add.text(0, 0, text, {
             fontFamily: '"Press Start 2P"',
@@ -786,20 +803,32 @@ export default class InfoPanel {
             fontStyle: 'bold',
         });
         label.setOrigin(0.5);
+
+        // Resize bg to fit the rendered text
+        label.updateText();
+        const padX = 14;
+        bg.setSize(Math.ceil(label.width + padX * 2), 28);
+        bg.setDisplaySize(bg.width, bg.height);
         container.add([bg, label]);
         return container;
     }
 
     private createTechBadge(text: string): Phaser.GameObjects.Container {
         const container = this.scene.add.container(0, 0);
-        const bg = this.scene.add.rectangle(0, 0, text.length * 8 + 20, 28, 0x2d3748);
+        const bg = this.scene.add.rectangle(0, 0, 10, 28, 0x2d3748);
         bg.setStrokeStyle(1, 0x4a5568);
         const label = this.scene.add.text(0, 0, text, {
             fontFamily: '"Press Start 2P"',
-            fontSize: '14px',
+            fontSize: '12px',
             color: '#e2e8f0',
         });
         label.setOrigin(0.5);
+
+        // Resize bg to fit the rendered text
+        label.updateText();
+        const padX = 12;
+        bg.setSize(Math.ceil(label.width + padX * 2), 28);
+        bg.setDisplaySize(bg.width, bg.height);
         container.add([bg, label]);
         return container;
     }
