@@ -714,30 +714,54 @@ export default class InfoPanel {
 
             // Create technology badges
             const techContainer = this.scene.add.container(0, yOffset);
-            let xPos = leftX;
-            let yPos = 0;
             const maxWidth = contentWidth;
-            let currentRowWidth = 0;
+            const gap = 10;
+            type BadgeInfo = {
+                badge: Phaser.GameObjects.Container;
+                width: number;
+                height: number;
+            };
 
-            experience.technologies.forEach((tech, index) => {
+            const allBadges: BadgeInfo[] = experience.technologies.map((tech) => {
                 const badge = this.createTechBadge(tech);
                 const badgeBg = badge.getAt(0) as Phaser.GameObjects.Rectangle;
-                const badgeWidth = badgeBg.displayWidth || badgeBg.width;
-                const badgeHeight = badgeBg.displayHeight || badgeBg.height;
-                const rowHeight = badgeHeight + 10;
+                const width = badgeBg.displayWidth || badgeBg.width;
+                const height = badgeBg.displayHeight || badgeBg.height;
+                return { badge, width, height };
+            });
 
-                if (currentRowWidth + badgeWidth > maxWidth && index > 0) {
-                    xPos = -(this.panelWidth / 2 - 80);
-                    yPos += rowHeight;
+            const rows: BadgeInfo[][] = [];
+            let currentRow: BadgeInfo[] = [];
+            let currentRowWidth = 0;
+
+            for (const info of allBadges) {
+                const nextWidth = (currentRow.length > 0 ? gap : 0) + info.width;
+                if (currentRow.length > 0 && currentRowWidth + nextWidth > maxWidth) {
+                    rows.push(currentRow);
+                    currentRow = [];
                     currentRowWidth = 0;
                 }
+                currentRow.push(info);
+                currentRowWidth += (currentRow.length > 1 ? gap : 0) + info.width;
+            }
+            if (currentRow.length > 0) rows.push(currentRow);
 
-                badge.setPosition(xPos + badgeWidth / 2, yPos);
-                techContainer.add(badge);
-                
-                xPos += badgeWidth + 10;
-                currentRowWidth += badgeWidth + 10;
-            });
+            let yPos = 0;
+            const rowGap = 10;
+
+            for (const row of rows) {
+                const rowHeight = Math.max(...row.map((r) => r.height)) + rowGap;
+                const rowWidth = row.reduce((sum, r) => sum + r.width, 0) + gap * Math.max(0, row.length - 1);
+                let x = -rowWidth / 2;
+
+                for (const r of row) {
+                    r.badge.setPosition(x + r.width / 2, yPos);
+                    techContainer.add(r.badge);
+                    x += r.width + gap;
+                }
+
+                yPos += rowHeight;
+            }
 
             this.content.add(techContainer);
 
