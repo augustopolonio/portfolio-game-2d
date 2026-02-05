@@ -477,6 +477,7 @@ export default class InfoPanel {
 
         // Title above image
         const title = this.scene.add.text(0, yOffset, game.title, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '20px',
             color: '#ffffff',
             fontStyle: 'bold',
@@ -485,7 +486,7 @@ export default class InfoPanel {
         });
         title.setOrigin(0.5, 0);
         this.content.add(title);
-        yOffset += title.height + 50; // Increased margin
+        yOffset += title.height;
 
         // Game image - load dynamically
         const imageKey = `game_image_${game.id}`;
@@ -524,38 +525,56 @@ export default class InfoPanel {
             existingImage.destroy();
         }
 
-        let yOffset = startYOffset + 50;
-        const imageContainer = this.scene.add.container(0, yOffset);
+        const topMargin = 20;
+        const imageTopY = startYOffset + topMargin;
+        const imageContainer = this.scene.add.container(0, imageTopY);
         imageContainer.name = 'game_image_container';
+
+        const padding = this.getPadding();
+        const isMobile = !this.scene.game.device.os.desktop;
+        const maxWidth = Math.max(220, Math.min(isMobile ? 720 : 620, this.panelWidth - padding * 2 - 24));
+        // Let the image grow on larger panels, but keep a sensible bound.
+        const maxHeight = Math.max(140, Math.min(isMobile ? 420 : 340, Math.floor(this.panelHeight * 0.45)));
+
+        let imageDisplayHeight = 170;
 
         if (this.scene.textures.exists(imageKey)) {
             const gameImage = this.scene.add.image(0, 0, imageKey);
-            // Scale to fit max 300x170
-            const maxWidth = 300;
-            const maxHeight = 170;
+            // Scale to fit within responsive bounds
             const scale = Math.min(maxWidth / gameImage.width, maxHeight / gameImage.height, 1);
             gameImage.setScale(scale);
+            imageDisplayHeight = gameImage.displayHeight;
             imageContainer.add(gameImage);
         } else {
             // Fallback if image fails to load
-            const imageBox = this.scene.add.rectangle(0, 0, 300, 170, 0x2a2a2a);
+            const imageBox = this.scene.add.rectangle(0, 0, maxWidth, Math.min(240, maxHeight), 0x2a2a2a);
             imageBox.setStrokeStyle(2, 0x4a4a4a);
             const imageText = this.scene.add.text(0, 0, '🎮', {
+                fontFamily: '"Press Start 2P"',
                 fontSize: '48px',
             });
             imageText.setOrigin(0.5);
             imageContainer.add([imageBox, imageText]);
+
+            imageDisplayHeight = imageBox.displayHeight;
         }
 
+        // Top-align the image so it never overlaps the title above.
+        imageContainer.setY(imageTopY + imageDisplayHeight / 2);
+
         this.content.add(imageContainer);
-        yOffset += 100;
+
+        // Advance yOffset based on actual image size.
+        const bottomY = imageContainer.y + imageDisplayHeight / 2;
+        let yOffset = bottomY + 22;
 
         // Description
         const description = this.scene.add.text(0, yOffset, game.description, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '14px',
             color: '#cccccc',
             align: 'center',
-            wordWrap: { width: this.panelWidth - 100 },
+            wordWrap: { width: this.panelWidth - padding * 2 - 24 },
             lineSpacing: 5,
         });
         description.setOrigin(0.5, 0);
@@ -591,6 +610,7 @@ export default class InfoPanel {
 
         // Company & Title
         const company = this.scene.add.text(0, yOffset, experience.company, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '28px',
             color: '#ffffff',
             fontStyle: 'bold',
@@ -602,6 +622,7 @@ export default class InfoPanel {
 
         // Job Title
         const jobTitle = this.scene.add.text(0, yOffset, experience.title, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '18px',
             color: '#60a5fa',
             align: 'center',
@@ -617,6 +638,7 @@ export default class InfoPanel {
             yOffset,
             `${experience.period} • ${experience.location}`,
             {
+                fontFamily: '"Press Start 2P"',
                 fontSize: '16px',
                 color: '#888888',
                 align: 'center',
@@ -628,6 +650,7 @@ export default class InfoPanel {
 
         // Description
         const description = this.scene.add.text(0, yOffset, experience.description, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '14px',
             color: '#cccccc',
             align: 'center',
@@ -641,6 +664,7 @@ export default class InfoPanel {
         // Highlights
         if (experience.highlights.length > 0) {
             const highlightsTitle = this.scene.add.text(0, yOffset, 'Key Highlights:', {
+                fontFamily: '"Press Start 2P"',
                 fontSize: '16px',
                 color: '#ffffff',
                 fontStyle: 'bold',
@@ -655,6 +679,7 @@ export default class InfoPanel {
                     yOffset,
                     `• ${highlight}`,
                     {
+                        fontFamily: '"Press Start 2P"',
                         fontSize: '12px',
                         color: '#aaaaaa',
                         wordWrap: { width: this.panelWidth - 140 },
@@ -672,6 +697,7 @@ export default class InfoPanel {
         // Technologies
         if (experience.technologies.length > 0) {
             const techTitle = this.scene.add.text(0, yOffset, 'Technologies:', {
+                fontFamily: '"Press Start 2P"',
                 fontSize: '16px',
                 color: '#ffffff',
                 fontStyle: 'bold',
@@ -754,6 +780,7 @@ export default class InfoPanel {
         const bg = this.scene.add.rectangle(0, 0, text.length * 12 + 20, 28, parseInt(color.replace('#', '0x')));
         bg.setStrokeStyle(2, parseInt(color.replace('#', '0x')));
         const label = this.scene.add.text(0, 0, text, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '14px',
             color: '#000000',
             fontStyle: 'bold',
@@ -768,6 +795,7 @@ export default class InfoPanel {
         const bg = this.scene.add.rectangle(0, 0, text.length * 8 + 20, 28, 0x2d3748);
         bg.setStrokeStyle(1, 0x4a5568);
         const label = this.scene.add.text(0, 0, text, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '14px',
             color: '#e2e8f0',
         });
@@ -796,6 +824,7 @@ export default class InfoPanel {
         bg.setStrokeStyle(2, borderColor);
         
         const label = this.scene.add.text(0, 0, text, {
+            fontFamily: '"Press Start 2P"',
             fontSize: `${fontSize}px`,
             color: '#ffffff',
             fontStyle: 'bold',
@@ -829,6 +858,7 @@ export default class InfoPanel {
     private showError(message: string) {
         this.content.removeAll(true);
         const errorText = this.scene.add.text(0, 0, message, {
+            fontFamily: '"Press Start 2P"',
             fontSize: '24px',
             color: '#ff6b6b',
             align: 'center',
